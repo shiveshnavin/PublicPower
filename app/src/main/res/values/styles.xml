@@ -14,10 +14,11 @@
     </style>
 
 
-    <style name="FullScreen"    parent="Theme.AppCompat.NoActionBar">
+    <style name="FullScreen" parent="Theme.AppCompat.NoActionBar">
 
 
     </style>
+
     <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
         <!-- Used for the buttons -->
         <item name="colorAccent">#4dd0e1</item>

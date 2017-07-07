@@ -12,4 +12,10 @@
 
     <dimen name="rounded_corner_rad">30dp</dimen>
 
+
+    <dimen name="home_items_text_size">12sp</dimen>
+    <dimen name="home_items_padding">13dp</dimen>
+    <dimen name="home_items_image">50dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
 </resources>
