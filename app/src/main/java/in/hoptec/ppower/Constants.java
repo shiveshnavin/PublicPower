@@ -18,6 +18,8 @@ public class Constants {
     public static String API_USER_REG_GET="/createuser.php";
     public static String API_USER_LOGIN_GET="/login.php";
 
+    //GET query
+    public static String API_GET_VIDEOS="/latest_videos.php";
 
 
     public static boolean IS_ANIMATED_BG_SPLASH=false;
