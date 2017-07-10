@@ -10,6 +10,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.androidnetworking.AndroidNetworking;
+import com.iceteck.silicompressorr.SiliCompressor;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,7 +46,6 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
 
-
         ButterKnife.bind(this);
         AndroidNetworking.initialize(ctx);
 
@@ -72,7 +72,6 @@ public class Home extends AppCompatActivity {
                 startActivity(new Intent(ctx,Report.class));
             }
         });
-
 
         latest.setOnClickListener(new View.OnClickListener() {
             @Override

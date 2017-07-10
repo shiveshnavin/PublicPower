@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -52,6 +53,7 @@ import com.google.gson.JsonSyntaxException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
@@ -824,6 +826,38 @@ public class utl {
     }
 
 
+    public static boolean saveVideoThumb(String filenameTarget,String video)
+    {
+        Bitmap bmp;
+
+        bmp = ThumbnailUtils.createVideoThumbnail(video, MediaStore.Video.Thumbnails.MINI_KIND);
+
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(filenameTarget);
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+            // PNG is a lossless format, the compression factor (100) is ignored
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        finally {
+            try {
+                if (out != null) {
+                    out.close();
+                    return true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return false;
+        }
+
+
+    }
 
 
 

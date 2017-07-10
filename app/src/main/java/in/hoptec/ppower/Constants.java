@@ -13,7 +13,7 @@ public class Constants {
 
 
 
-    public static String HOST="http://192.168.23.3";
+    public static String HOST="http://10.42.0.80/genric/api";
 
     public static String API_USER_REG_GET="/createuser.php";
     public static String API_USER_LOGIN_GET="/login.php";

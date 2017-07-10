@@ -799,6 +799,8 @@ private class StartNextRotate implements Animation.AnimationListener {
                         }
                         else {
 
+
+
                            // startlogin(tmpusr.user_email,tmpusr.suid,1);
                         }
 

@@ -7,7 +7,7 @@ android {
         applicationId "in.hoptec.ppower"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 1
+        versionCode 15
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -38,6 +38,7 @@ android {
 allprojects {
     repositories {
         maven { url "https://jitpack.io" }
+        maven { url 'https://dl.bintray.com/drummer-aidan/maven' }
     }
 }
 dependencies {
@@ -53,6 +54,10 @@ dependencies {
     compile 'com.android.support:design:25.1.1'
     compile 'com.android.support:cardview-v7:25.0.1'
 
+    //util
+    compile 'com.iceteck.silicompressorr:silicompressor:2.0'
+
+
 
     //ui
     compile 'com.daniribalbert:custom-font-lib:0.9.8'
@@ -60,7 +65,8 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
     compile 'com.wang.avi:library:2.1.3'
-    compile 'uk.co.jakelee:vidsta:1.0.0'
+    compile 'com.afollestad:easyvideoplayer:0.3.0'
+    // compile 'uk.co.jakelee:vidsta:1.0.0'
     compile 'com.github.mancj:MaterialSearchBar:0.7'
 
 

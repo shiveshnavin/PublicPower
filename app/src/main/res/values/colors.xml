@@ -6,18 +6,10 @@
 
 
 
-
-
-
-
-
     <color name="color_splash_accent">#000</color>
-    <color name="transparent_semi">#a9bdbdbd</color>
 
 
-
-
-
+    <color name="transparent_semi">#12000000</color>
 
     <color name="primary">#009688</color>
     <color name="primary_dark">#00796B</color>
