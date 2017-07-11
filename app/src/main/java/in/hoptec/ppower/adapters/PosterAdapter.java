@@ -141,10 +141,10 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.CustomView
                                     cab.click(cat,id,cv.view);
                                     break;
                                 case R.id.like:
-                                    //handle menu2 click
+                                    cab.like(cat,true);
                                     break;
                                 case R.id.share:
-                                    //handle menu3 click
+                                    cab.share(cat,id);
                                     break;
                             }
                             return false;

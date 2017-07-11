@@ -57,11 +57,11 @@
 
     <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
         <!-- Used for the buttons -->
-        <item name="colorAccent">#4dd0e1</item>
+        <item name="colorAccent">#26a69a</item>
         <!-- Used for the title and text -->
-        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColorPrimary">@color/grey_700</item>
         <!-- Used for the background -->
-        <item name="android:background">#388e3c</item>
+        <item name="android:background">@color/offwhite</item>
         <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
 
     </style>
@@ -71,4 +71,13 @@
         <item name="android:textColor">#448aff</item>
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
     </style>
+
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/d_up</item>
+        <item name="android:windowExitAnimation">@anim/d_down</item>
+    </style>
+
+
+
 </resources>

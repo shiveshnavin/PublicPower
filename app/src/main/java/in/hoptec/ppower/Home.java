@@ -255,7 +255,10 @@ public class Home extends AppCompatActivity {
     @Override
     public void onPause()
     {
+        player.setLoop(false);
+
         player.pause();
+
         super.onPause();
 
     }

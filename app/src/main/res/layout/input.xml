@@ -9,6 +9,7 @@
     <com.daniribalbert.customfontlib.views.CustomFontEditText
         android:layout_margin="10dp"
         android:id="@+id/input"
+        android:textColor="@color/grey_900"
         app:font="Avenir-Medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

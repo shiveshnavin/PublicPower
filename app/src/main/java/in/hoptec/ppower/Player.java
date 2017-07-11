@@ -1,6 +1,7 @@
 package in.hoptec.ppower;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,8 +11,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -30,6 +36,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import in.hoptec.ppower.adapters.CommentAdapter;
 import in.hoptec.ppower.database.Comment;
 import in.hoptec.ppower.database.Feed;
 
@@ -116,6 +123,9 @@ public class Player extends AppCompatActivity {
 
         }
 
+        getVideos(fed.id);
+        getComments();
+
         like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -134,7 +144,14 @@ public class Player extends AppCompatActivity {
         comment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                comment();
+
+                try {
+                    setUpList(comments);
+                    ;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //  comment();
             }
         });
 
@@ -228,6 +245,49 @@ public class Player extends AppCompatActivity {
 
 
 
+
+    public void getVideos(final String vid)
+    {
+
+        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode("");
+        utl.l("Video : "+url);
+        AndroidNetworking.get(url).build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+
+
+                        ArrayList<Feed>  feeds= parser(response);
+                        for(int i=0;i<feeds.size();i++)
+                        {
+                            if(feeds.get(i).id.equals(""+vid))
+                            {
+                                fed=feeds.get(i);
+                                isLiked=fed.isLiked(user.uid);
+                                set();
+
+                                break;
+                            }
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onError(ANError ANError) {
+
+
+                        utl.l(ANError.getErrorDetail());
+                    }
+                });
+
+
+
+    }
+
+
+
+
     boolean forefulPause =true;
     boolean firstTime =true;
 
@@ -314,7 +374,7 @@ public class Player extends AppCompatActivity {
                 +"&vid="+fed.id
                 +"&user_image="+  URLEncoder.encode(user.user_image)
                 +"&user_id="+user.uid ;
-
+    utl.l(url);
 
         AndroidNetworking.get(url).build().getAsString(new StringRequestListener() {
             @Override
@@ -343,15 +403,15 @@ public class Player extends AppCompatActivity {
 
 
 
-
     public void getComments()
     {
 
-        String url=Constants.HOST+"/api/getcomments.php?vid="+fed.id;
+        String url=Constants.HOST+Constants.API_GET_COMMENTS+"?vid="+fed.id;
+        utl.l(url);
         AndroidNetworking.get(url).build().getAsString(new StringRequestListener() {
             @Override
             public void onResponse(String response) {
-                utl.l(response);
+                utl.l(response.replace(",{","\n"));
                 comments=new ArrayList<>();
                 try {
                     JSONArray jr=new JSONArray(response);
@@ -361,8 +421,30 @@ public class Player extends AppCompatActivity {
                         comments.add(js.fromJson(jr.get(i).toString(),Comment.class));
                     }
 
+                    if(adapter!=null&&rv!=null)
+                    {
+                        adapter=new CommentAdapter(ctx, comments, new CommentAdapter.CallBacks() {
+                            @Override
+                            public void share(Comment cat, int id) {
 
-                    setUpList(comments);
+                            }
+
+                            @Override
+                            public void like(Comment cat, boolean like) {
+
+                            }
+
+                            @Override
+                            public void click(Comment cat, int id, View v) {
+
+                            }
+                        });
+                        rv.setAdapter(adapter);
+
+
+                    }
+
+
 
 
                 } catch (JSONException e) {
@@ -373,6 +455,7 @@ public class Player extends AppCompatActivity {
             @Override
             public void onError(ANError ANError) {
 
+                utl.l("434"+ANError.getErrorDetail());
             }
         });
 
@@ -384,7 +467,7 @@ public class Player extends AppCompatActivity {
 
         title.setText(fed.title);
         desc.setText(fed.description+"\n\n"+fed.getCreatedAt()+"\n\n"+fed.likes+" Likes");
-        if(isLiked)
+        if(fed.isLiked(user.uid))
         {
             like.setImageResource(R.drawable.loved);
 
@@ -473,7 +556,7 @@ public class Player extends AppCompatActivity {
 
         }
 
-        set();
+        //set();
 
 
         likee(fed);
@@ -484,7 +567,7 @@ public class Player extends AppCompatActivity {
 
 
 
-    public void likee(Feed fed)
+    public void likee(Feed fedd)
     {
         //GET user_id vid
 
@@ -497,6 +580,8 @@ public class Player extends AppCompatActivity {
             public void onResponse(String response) {
 
                 utl.snack(act,"Thanks ! ");
+                fed=utl.js.fromJson(response,Feed.class);
+                set();
 
             }
 
@@ -519,7 +604,7 @@ public class Player extends AppCompatActivity {
             return;
         }
 
-        utl.inputDialog(ctx, "Comment", "Say something...", utl.TYPE_DEF, new utl.InputDialogCallback() {
+        utl.inputDialog(ctx, "", "Say something...", utl.TYPE_DEF, new utl.InputDialogCallback() {
             @Override
             public void onDone(String text) {
                 comment(text);
@@ -546,14 +631,62 @@ public class Player extends AppCompatActivity {
 
 
 
-
+    RecyclerView rv;
+    CommentAdapter adapter;
     public void setUpList(ArrayList<Comment> feeds)
     {
 
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(ctx);
+        View convertView = LayoutInflater.from(ctx).inflate(R.layout.commets_diag, null);
+        alertDialog.setView(convertView);
+
+
+
+        Dialog dialog = alertDialog.create();
+        rv = (RecyclerView) convertView.findViewById(R.id.rec);
+         View c = ( View) convertView.findViewById(R.id.comment);
+        c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                comment();
+            }
+        });
+
+        rv.setLayoutManager(new LinearLayoutManager(ctx));
+         adapter=new CommentAdapter(ctx, feeds, new CommentAdapter.CallBacks() {
+            @Override
+            public void share(Comment cat, int id) {
+
+            }
+
+            @Override
+            public void like(Comment cat, boolean like) {
+
+            }
+
+            @Override
+            public void click(Comment cat, int id, View v) {
+
+            }
+        });
+        rv.setAdapter(adapter);
+        rv.setHasFixedSize(true);
 
 
 
 
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.gravity = Gravity.BOTTOM;
+        lp.windowAnimations = R.style.DialogAnimation;
+        dialog.getWindow().setAttributes(lp);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+
+
+        dialog.show();
 
 
 

@@ -417,7 +417,13 @@ private class StartNextRotate implements Animation.AnimationListener {
         if(firebaseUser==null)
             return;
 
+        GenricUser tmp=utl.readUserData();
+
         user=new GenricUser(firebaseUser);
+        if(tmp!=null)
+        {
+            user.uid=tmp.uid;
+        }
         utl.writeUserData(user,ctx);
 
         utl.l("Provider " ,FirebaseAuth.getInstance().getCurrentUser().getProviderId());
@@ -480,7 +486,7 @@ private class StartNextRotate implements Animation.AnimationListener {
 
             if(phone!=null)
             {
-                user.user_phone=phone;
+                user.extra1=phone;
             }
             register(user);
 
@@ -768,10 +774,66 @@ private class StartNextRotate implements Animation.AnimationListener {
     //************************M LOGIN***********************/
 
 
-
-    public void register( final GenricUser tmpusr)
+    public GenricUser condition(GenricUser tmpusr)
     {
 
+        if(tmpusr.user_email==null)
+        {
+            tmpusr.user_email="default@example.com";
+
+        }
+
+        if(tmpusr.user_name==null)
+        {
+            tmpusr.user_name=utl.refineString(tmpusr.user_fname,"")+"_"+utl.uid(4);
+
+        }
+
+        if(tmpusr.auth==null)
+        {
+            tmpusr.auth= (firebaseUser.getUid());
+
+        }
+
+
+        if(tmpusr.user_image==null)
+        {
+            tmpusr.user_image= "http://placehold.it/200x200";
+
+        }
+
+        if(tmpusr.user_email.length()<2)
+        {
+            tmpusr.user_email="default@example.com";
+
+        }
+
+        if(tmpusr.user_name.length()<2)
+        {
+            tmpusr.user_name=utl.refineString(tmpusr.user_fname,"")+"_"+utl.uid(4);
+
+        }
+
+
+        if(tmpusr.auth.length()<2)
+        {
+            tmpusr.auth= (firebaseUser.getUid());
+
+        }
+
+        if(tmpusr.user_image.length()<2)
+        {
+            tmpusr.user_image= "http://placehold.it/200x200";
+
+        }
+
+        return tmpusr;
+    }
+    public void register(   GenricUser tmpusr)
+    {
+
+
+        tmpusr=condition(tmpusr);
 
         String url=Constants.HOST+Constants.API_USER_REG_GET+"?"+
                 "user_name="+ URLEncoder.encode(""+tmpusr.user_name) +
@@ -779,7 +841,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                 "&user_fname="+ URLEncoder.encode(""+tmpusr.user_fname) +
                 "&user_password="+ URLEncoder.encode(""+tmpusr.user_password) +
                 "&user_image="+ URLEncoder.encode(""+tmpusr.user_image) +
-                "&user_phone="+ URLEncoder.encode(""+tmpusr.user_phone) +
+                "&extra1="+ URLEncoder.encode(""+tmpusr.extra1) +
                 "&auth="+ URLEncoder.encode(""+tmpusr.suid);
 
 

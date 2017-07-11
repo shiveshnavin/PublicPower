@@ -53,6 +53,10 @@ public class Feed {
 
     public boolean isLiked(String userId)
     {
+        if(tagList==null)
+        {
+            return false;
+        }
         return tagList.contains(userId);
     }
     public String getCreatedAt()
