@@ -51,6 +51,10 @@ public class Feed {
     @Expose
     public String tagList;
 
+    public boolean isLiked(String userId)
+    {
+        return tagList.contains(userId);
+    }
     public String getCreatedAt()
     {
 
@@ -71,6 +75,31 @@ public class Feed {
 
         return createdAt;
     }
+
+    public String getTitle()
+    {
+        if(title.length()>20)
+        {
+            return title.substring(0,20)+"...";
+
+        }
+        else
+            return title;
+    }
+
+
+    public String getDescription()
+    {
+        if(description.length()>70)
+        {
+            return description.substring(0,70)+"...";
+
+        }
+        else
+            return description;
+    }
+
+
 
 
 

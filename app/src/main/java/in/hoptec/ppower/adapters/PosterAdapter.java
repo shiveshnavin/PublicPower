@@ -8,6 +8,7 @@ import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.telecom.Call;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -33,6 +34,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import in.hoptec.ppower.LatestVideos;
 import in.hoptec.ppower.R;
 import in.hoptec.ppower.database.Feed;
 import in.hoptec.ppower.utl;
@@ -44,9 +46,10 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.CustomView
     public List<Feed> feedItemList;
     private Context ctx;
 
-    public PosterAdapter(Context context, List<Feed> feedItemList) {
+    public PosterAdapter(Context context, List<Feed> feedItemList,CallBacks cab) {
         this.feedItemList = feedItemList;
         this.ctx = context;
+        this.cab=cab;
         AndroidNetworking.initialize(ctx);
        }
 
@@ -105,7 +108,7 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.CustomView
 
         final int col=colors[dp.intValue()];
 
-        cv.name.setText( (cat.title));
+        cv.name.setText( (cat.getTitle()));
         cv.sub.setText( (cat.description));
         cv.time.setText(cat.getCreatedAt());
 
@@ -118,6 +121,7 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.CustomView
 
 
             utl.changeColorDrawable(cv.opt,R.color.grey_600);
+            utl.changeColorDrawable(cv.play,R.color.white);
 
             cv.opt.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -134,7 +138,7 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.CustomView
                             switch (item.getItemId()) {
                                 case R.id.view:
                                     //handle menu1 click
-                                    click(cat,id);
+                                    cab.click(cat,id,cv.view);
                                     break;
                                 case R.id.like:
                                     //handle menu2 click
@@ -193,107 +197,73 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.CustomView
         }
 
 
-/* try  {
-          //  customViewHolder. wb.loadData(cat.excerpt.rendered, "text/html", "UTF-8");
-             utl.l("Post "+cat.title.rendered);
-
-
-           //  Html.fromHtml(cat.title.rendered);
-             cv.name.setText( Html.fromHtml(cat.title.rendered));
-             cv.sub.setText( Html.fromHtml(cat.excerpt.rendered));
-             try {
-                 AndroidNetworking.get(cat.links.wpAttachment.get(0).href).build()
-                         .getAsString(new StringRequestListener() {
-                             @Override
-                             public void onResponse(String response) {
-
-                                 try {
-                                     JSONArray jo=new JSONArray(response);
-                                     JSONObject j=jo.getJSONObject(0);
-                                     String  url=j.getJSONObject("guid").getString("rendered").replace("\\/","/");
-                                     utl.l("url "+url);
-                                     try {
-                                         Picasso.with(ctx).load(url).placeholder(R.drawable.background_poly).into(cv.pic);
-                                     } catch (Exception e) {
-
-                                         Picasso.with(ctx).load(url).into(cv.pic);
-
-                                         e.printStackTrace();
-                                     }
-
-                                     cat.slug=url;
-                                 } catch (Exception e) {
-                                     e.printStackTrace();
-                                 }
-                             }
-
-                             @Override
-                             public void onError(ANError ANError) {
-                                 utl.l(""+ANError.getErrorBody());
-                             }
-                         });
-             } catch (Exception e) {
-                 e.printStackTrace();
-             }
-
-
-         }
-         catch (Error e)
-         {
-          }
-         catch (Exception e) {
-            e.printStackTrace();
-        }
-*/
         cv.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                click(cat,id);
+                cab.click(cat,id,cv.view);
             }
         });
+
+        try {
+            if(isLiked(cat.id))
+            {
+                cv.like.setImageResource(R.drawable.loved);
+
+            }
+            cv.like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+
+                    utl.l("looking for  "+cat.id);
+                    utl.l("in "+LatestVideos.likes);
+
+
+                    if(isLiked(cat.id))
+                    {
+                        cv.like.setImageResource(R.drawable.love);
+                        LatestVideos.likes=LatestVideos.likes.replace(":"+cat.id,"");
+                    }
+                    else
+                    {
+                        cv.like.setImageResource(R.drawable.loved);
+                        LatestVideos.likes+=":"+cat.id;
+                    }
+                    cab.like(cat,isLiked(cat.id));
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }
 
+    public boolean isLiked(String id)
+    {
+        return LatestVideos.likes.contains(":"+ id);
+    }
     int qan;
     @Override
     public int getItemCount() {
         return (null != feedItemList ? feedItemList.size() : 0);
     }
 
-    public void add(Feed cat,int id)
-    {
+    CallBacks cab;
+    public static interface CallBacks{
 
+    public void share(Feed cat,int id);
+
+    public void like(Feed cat,boolean like);
+
+    public void click(Feed cat,int id,View v);
     }
-
-
-    public void intr(Feed cat,int id)
-    {
-
-    }
-
-
-    public void checkin(Feed cat,int id)
-    {
-
-    }
-
-    public void disco(Feed cat,int id)
-    {
-
-    }
-
-    public void click(Feed cat,int id)
-    {
-
-    }
-
 
 public class CustomViewHolder extends RecyclerView.ViewHolder
 {
     public View view;
 
-    public ImageView pic,opt;
+    public ImageView pic,opt,like,play;
     public TextView name,sub,time;
     public WebView wb;
     public View line;
@@ -306,6 +276,8 @@ public class CustomViewHolder extends RecyclerView.ViewHolder
 
        // wb=(WebView) itemView.findViewById(R.id.web);
         pic=(ImageView) itemView.findViewById(R.id.thumbnail);
+        play=(ImageView) itemView.findViewById(R.id.play);
+        like=(ImageView) itemView.findViewById(R.id.love);
         opt=(ImageView) itemView.findViewById(R.id.opt);
         name=(TextView) itemView.findViewById(R.id.text);
         sub=(TextView) itemView.findViewById(R.id.text2);

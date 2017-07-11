@@ -515,7 +515,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                 startActivity(intent);
             }
 
-            //finish();
+           finish();
 
 
 
@@ -799,6 +799,9 @@ private class StartNextRotate implements Animation.AnimationListener {
                         }
                         else {
 
+
+                            GenricUser user=utl.js.fromJson(response,GenricUser.class);
+                            utl.writeUserData(user,ctx);
 
 
                            // startlogin(tmpusr.user_email,tmpusr.suid,1);

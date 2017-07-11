@@ -4,6 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:background="@color/white"
+    android:transitionName="@string/activity_image_trans"
     android:id="@+id/main_target"
     android:layout_height="wrap_content">
 
@@ -14,15 +15,36 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <RelativeLayout
+            android:id="@+id/pic"
+            android:layout_weight="0.35"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" >
+
+
         <ImageView
             android:scaleType="centerCrop"
             android:src="@drawable/videos_1"
             android:id="@+id/thumbnail"
-            android:layout_weight="0.35"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+         <ImageView
+             android:id="@+id/play"
+             android:background="@color/transparent_semi"
+             android:src="@drawable/play"
+             android:scaleType="fitCenter"
+             android:padding="10dp"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent" />
 
+
+
+
+
+
+
+        </RelativeLayout>
 
         <LinearLayout
             android:weightSum="1.7"
@@ -48,7 +70,7 @@
             <com.daniribalbert.customfontlib.views.CustomFontTextView
                 android:padding="10dp"
 
-                android:maxLines="2"
+                android:maxLines="1"
 
                 android:ellipsize="end"
 
@@ -77,32 +99,53 @@
             <com.daniribalbert.customfontlib.views.CustomFontTextView
                 android:padding="10dp"
 
-                android:maxLines="3"
-                android:ellipsize="end"
+                android:ellipsize="marquee"
 
                 android:id="@+id/text2"
                 android:gravity="center_vertical"
                 android:textSize="15sp"
                 android:text="Hi ! this is me"
                 android:textColor="@color/grey_800"
-                android:layout_weight="0.7"
+                android:layout_weight="0.8"
                 app:font="avenir-next-regular"
                 android:layout_width="match_parent"
                 android:layout_height="0dp" />
 
 
-            <com.daniribalbert.customfontlib.views.CustomFontTextView
-                android:padding="10dp"
-                android:id="@+id/time"
-                android:textSize="14sp"
-                android:text="19 July"
-                android:textColor="@color/grey_700"
-                android:layout_weight="0.5"
-                android:layout_gravity="bottom"
-                android:gravity="bottom"
-                app:font="Roboto-Thin"
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_weight="0.4"
                 android:layout_width="match_parent"
-                android:layout_height="0dp" />
+                android:layout_height="0dp" >
+
+
+                <com.daniribalbert.customfontlib.views.CustomFontTextView
+                    android:padding="10dp"
+
+
+                    android:layout_weight="0.8"
+                    android:id="@+id/time"
+                    android:textSize="14sp"
+                    android:text="19 July"
+                    android:textColor="@color/grey_700"
+                    app:font="Avenir-Medium"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:padding="8dp"
+                    android:layout_weight="0.2"
+                    android:src="@drawable/love"
+                    android:id="@+id/love"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+
+
+            </LinearLayout>
+
 
 
 

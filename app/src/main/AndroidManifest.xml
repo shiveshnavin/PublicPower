@@ -12,6 +12,7 @@
 
     <application
         android:name=".BaseApp"
+        android:largeHeap="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -19,7 +20,16 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Splash"
-            android:theme="@style/FullScreen" />
+            android:theme="@style/FullScreen" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
+
+            </activity>
 
         <!-- FACEBOOK -->
 
@@ -46,17 +56,19 @@
         <activity
             android:name=".Home"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".Report"
             android:label="@string/title_activity_report"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity   android:theme="@style/FullScreen" android:name=".LatestVideos"></activity>
+        <activity   android:theme="@style/FullScreen" android:name=".Player"
+
+            android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"
+
+
+            ></activity>
     </application>
 
 </manifest>

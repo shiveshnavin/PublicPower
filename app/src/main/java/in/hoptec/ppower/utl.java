@@ -83,6 +83,111 @@ public class utl {
 
     public static Context ctx;
 
+
+
+
+
+
+
+
+    /**************************DEPENDENT**************************/
+
+
+
+    public static class SearchHistory{
+        public int size;
+        List<String > list;
+    }
+    public static void addSearches(String search)
+    {
+
+        List<String > list=new ArrayList<>();
+
+        if(getSearches()!=null)
+        {
+            list=getSearches();
+        }
+
+        utl.l("Addeing "+search+" To pool"+list.size());
+        list.add(search);
+
+        SearchHistory sr=new SearchHistory();
+        sr.list=list;
+        sr.size=list.size();
+
+        writeData(js.toJson(sr));
+
+
+    }
+
+
+    public static void setSearches(List<String > list)
+    {
+
+
+        SearchHistory sr=new SearchHistory();
+        sr.list=list;
+        sr.size=list.size();
+
+        writeData(js.toJson(sr));
+
+
+    }
+
+
+
+    public static List<String > getSearches( )
+    {
+        List<String > list=null;
+
+        try {
+            String json=readData();
+            utl.l("searches "+json );
+
+            list=js.fromJson(json,SearchHistory.class).list;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*********************************************************/
     public static void init(Context ctxx)
     {
          ctx=ctxx;
@@ -354,7 +459,7 @@ public class utl {
     }
 
 
-    public static void changeColorDrawable(ImageView imageView, @DrawableRes int res) {
+    public static void changeColorDrawable(ImageView imageView, @ColorRes int res) {
 
         DrawableCompat.setTint(imageView.getDrawable(), ContextCompat.getColor(ctx, res));
 
@@ -725,7 +830,6 @@ public class utl {
 
     }
 
-
     public static void copyFile(File src,File dst)
     {
         try{
@@ -756,7 +860,7 @@ public class utl {
 
     public static  boolean writeData(String text)
     {
-        String data= Constants.userDataFile();
+        String data= Constants.localDataFile();
         FileOperations fop=new FileOperations();
         Gson g=new Gson();
         fop.write(data,text);
@@ -765,9 +869,29 @@ public class utl {
     }
 
 
+
+
+    public static String readData()
+    {
+        String data= Constants.localDataFile();
+        if(!new File(data).exists())
+            return null;
+        FileOperations fop=new FileOperations();
+
+        Log.d("DATA READ",""+fop.read(data));
+        return  fop.read(data);
+
+
+
+    }
+
+
+
+
+
     public static  boolean removeData()
     {
-        String data= Constants.userDataFile();
+        String data= Constants.localDataFile();
         File f=new File(data);
         f.delete();
         return  true;

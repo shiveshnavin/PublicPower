@@ -19,6 +19,13 @@
         android:layout_height="0dp">
 
 
+        <com.afollestad.easyvideoplayer.EasyVideoPlayer
+            android:transitionName="@string/activity_image_trans2"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
     </LinearLayout>
 
 
@@ -37,7 +44,7 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
-            android:transitionName="@string/activity_image_trans"
+            android:transitionName="@string/activity_image_trans2"
             android:padding="@dimen/home_items_padding"
             android:alpha="1"
             android:orientation="vertical"
@@ -75,7 +82,7 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:transitionName="@string/activity_image_trans"
+            android:transitionName="@string/activity_image_trans2"
 
             android:alpha="1"
 
@@ -126,7 +133,7 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
-            android:transitionName="@string/activity_image_trans"
+            android:transitionName="@string/activity_image_trans2"
 
             android:alpha="1"
             android:orientation="vertical"
@@ -152,7 +159,7 @@
                 android:gravity="center"
                 android:textSize="@dimen/home_items_text_size"
                 android:textColor="@color/grey_800"
-                android:text="Latest Videos"
+                android:text="Upload"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/imageViewu"
@@ -164,7 +171,7 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:transitionName="@string/activity_image_trans"
+            android:transitionName="@string/activity_image_trans2"
 
             android:alpha="1"
             android:orientation="vertical"
@@ -189,7 +196,7 @@
                 android:gravity="center"
                 android:textSize="@dimen/home_items_text_size"
                 android:textColor="@color/grey_800"
-                android:text="My Uploads"
+                android:text="My Account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/imageView2s"
