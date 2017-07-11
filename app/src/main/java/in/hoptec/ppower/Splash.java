@@ -537,6 +537,7 @@ private class StartNextRotate implements Animation.AnimationListener {
 
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 
@@ -564,7 +565,7 @@ private class StartNextRotate implements Animation.AnimationListener {
 
     private void handleSignInResult(GoogleSignInAccount acct) {
 
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId()+"\nAccess Token : "+acct.getIdToken());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)

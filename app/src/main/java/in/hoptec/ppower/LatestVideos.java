@@ -3,6 +3,7 @@ package in.hoptec.ppower;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -202,11 +203,22 @@ public class LatestVideos extends AppCompatActivity {
 
 
 
+                Intent txtIntent = new Intent(Intent.ACTION_SEND);
+                txtIntent .setType("text/plain");
+                txtIntent .putExtra(Intent.EXTRA_SUBJECT, cat.title);
+                txtIntent .putExtra(Intent.EXTRA_TEXT,(Constants.HOST+Constants.API_SHARE+"?vid="+cat.id));
+                startActivity(Intent.createChooser(txtIntent ,"Share "+cat.getTitle()));
+
+
 
             }
 
             @Override
             public void like(Feed cat, boolean like) {
+
+
+                    likee(cat);
+
 
             }
 
@@ -324,6 +336,32 @@ public class LatestVideos extends AppCompatActivity {
 
     }
 
+
+
+
+    public void likee(Feed fed)
+    {
+        //GET user_id vid
+
+        String url=Constants.HOST+Constants.API_LIKE+"?user_id="+user.uid+"&vid="+fed.id;
+        utl.l(url);
+
+
+        AndroidNetworking.get(url).build().getAsString(new StringRequestListener() {
+            @Override
+            public void onResponse(String response) {
+
+                utl.snack(act,"Thanks ! ");
+
+            }
+
+            @Override
+            public void onError(ANError ANError) {
+
+                    utl.l(ANError.getErrorDetail());
+            }
+        });
+    }
 
 
 

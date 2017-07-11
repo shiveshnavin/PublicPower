@@ -13,13 +13,34 @@ public class Constants {
 
 
 
-    public static String HOST="https://bigpitch.000webhostapp.com/api";
+    public static String HOST="https://bigpitch.000webhostapp.com";
 
-    public static String API_USER_REG_GET="/createuser.php";
-    public static String API_USER_LOGIN_GET="/login.php";
+    public static String API_USER_REG_GET="/api/createuser.php";
+    public static String API_USER_LOGIN_GET="/api/login.php";
 
-    //GET query
-    public static String API_GET_VIDEOS="/latest_videos.php";
+    //GET query city
+    public static String API_GET_VIDEOS="/api/latest_videos.php";
+
+    //GET vid
+    public static String API_GET_COMMENTS="/api/comments.php";
+
+    //GET user user_image user_id comment vid
+    public static String API_ADD_COMMENT="/api/comment.php";
+
+    //GET user_id vid
+    public static String API_LIKE="/api/like.php";
+
+    //GET user user_image user_id comment extra0 extra1 title
+    //extra0 -> attachment_link extra1 -> fcm token
+    public static String API_ADD_REPORT="/api/report.php";
+
+
+    //GET vid
+    public static String API_SHARE="/api/share.php";
+
+
+
+
 
 
     public static boolean IS_ANIMATED_BG_SPLASH=false;

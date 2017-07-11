@@ -45,7 +45,6 @@ public class Player extends AppCompatActivity {
     private EasyVideoPlayer player;
 
 
-    GenricUser user;
 
      @BindView(R.id.rec)
     RecyclerView rec;
@@ -76,6 +75,7 @@ public class Player extends AppCompatActivity {
 
     Gson js;
     Feed fed;
+    GenricUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +86,7 @@ public class Player extends AppCompatActivity {
         setContentView(R.layout.activity_player);
         player = ((EasyVideoPlayer) findViewById(R.id.player));
 
+        user=utl.readUserData();
 
 
         ButterKnife.bind(this);
@@ -94,8 +95,26 @@ public class Player extends AppCompatActivity {
         user=utl.readUserData();
 
         String jst=getIntent().getStringExtra("cat");
-        fed=js.fromJson(jst,Feed.class);
-        set();
+        Integer vid=getIntent().getIntExtra("vid",0);
+
+        if(jst!=null)
+        {
+
+            fed=js.fromJson(jst,Feed.class);
+            isLiked=fed.isLiked(user.uid);
+
+            set();
+            play(fed.streamUrl);
+
+        }
+
+        else if(vid!=0){
+
+
+            getVideos("",vid);
+
+
+        }
 
         like.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,8 +155,77 @@ public class Player extends AppCompatActivity {
 
 */
 
-        play(fed.streamUrl);
     }
+
+
+
+    ArrayList<Feed>  parser(String response)
+    {
+
+        utl.l(response);
+        ArrayList<Feed> videos=new ArrayList<Feed>();
+
+        try {
+            JSONArray jar=new JSONArray(response);
+
+            for(int i=0;i<jar.length();i++)
+            {
+                Feed fe=utl.js.fromJson(jar.getString(i),Feed.class);
+                videos.add(fe);
+            }
+
+            return videos;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return videos;
+        }
+
+
+    }
+
+
+    public void getVideos(String query,final Integer vid)
+    {
+
+        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode(query);
+        utl.l("Video : "+url);
+        AndroidNetworking.get(url).build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+
+
+                        ArrayList<Feed>  feeds= parser(response);
+                        for(int i=0;i<feeds.size();i++)
+                        {
+                            if(feeds.get(i).id.equals(""+vid))
+                            {
+                                fed=feeds.get(i);
+                                isLiked=fed.isLiked(user.uid);
+                                set();
+                                play(fed.streamUrl);
+
+                                break;
+                            }
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onError(ANError ANError) {
+
+
+                        utl.l(ANError.getErrorDetail());
+                    }
+                });
+
+
+
+    }
+
 
 
     boolean forefulPause =true;
@@ -218,20 +306,28 @@ public class Player extends AppCompatActivity {
     public void comment(final String comment)
     {
 
-        String url=Constants.HOST+"/api/comment.php?user="+
-                URLEncoder.encode(utl.getUser().getDisplayName())+"&comment="+ URLEncoder.encode(comment)+"&vid="+fed.id;
+        //GET user user_image user_id comment vid
+
+        String url=Constants.HOST+Constants.API_ADD_COMMENT+"?user="+
+                URLEncoder.encode(user.user_fname)
+                +"&comment="+ URLEncoder.encode(comment)
+                +"&vid="+fed.id
+                +"&user_image="+  URLEncoder.encode(user.user_image)
+                +"&user_id="+user.uid ;
+
+
         AndroidNetworking.get(url).build().getAsString(new StringRequestListener() {
             @Override
             public void onResponse(String response) {
                 utl.l(response);
 
-                    utl.l("Comment Success ",comment);
+                utl.l("Comment Success ",comment);
 
 
                 utl.snack(scrl,"Comment Posted !");
 
 
-                getCOmments();
+                getComments();
 
 
             }
@@ -248,7 +344,7 @@ public class Player extends AppCompatActivity {
 
 
 
-    public void getCOmments()
+    public void getComments()
     {
 
         String url=Constants.HOST+"/api/getcomments.php?vid="+fed.id;
@@ -282,11 +378,22 @@ public class Player extends AppCompatActivity {
 
     }
 
+    boolean isLiked;
     public void set()
     {
 
         title.setText(fed.title);
         desc.setText(fed.description+"\n\n"+fed.getCreatedAt()+"\n\n"+fed.likes+" Likes");
+        if(isLiked)
+        {
+            like.setImageResource(R.drawable.loved);
+
+        }
+        else {
+            like.setImageResource(R.drawable.love);
+
+        }
+
 
     }
 
@@ -353,41 +460,52 @@ public class Player extends AppCompatActivity {
             return;
         }
 
-        set();
-        like.setImageResource(R.drawable.loved);
 
-
-        String url=Constants.HOST+"/api/like.php?vid="+fed.id;
-        if(fed.isLiked(user.uid))
+        if(!isLiked)
         {
-            like.setImageResource(R.drawable.love);
-            url=Constants.HOST+"/api/unlike.php?vid="+fed.id;
+            like.setImageResource(R.drawable.loved);
+            fed.likes=""+(Integer.parseInt(fed.likes)+1);
 
         }
+        else {
+            like.setImageResource(R.drawable.love);
+            fed.likes=""+(Integer.parseInt(fed.likes)-1);
+
+        }
+
+        set();
+
+
+        likee(fed);
+
+
+
+    }
+
+
+
+    public void likee(Feed fed)
+    {
+        //GET user_id vid
+
+        String url=Constants.HOST+Constants.API_LIKE+"?user_id="+user.uid+"&vid="+fed.id;
+        utl.l(url);
+
 
         AndroidNetworking.get(url).build().getAsString(new StringRequestListener() {
             @Override
             public void onResponse(String response) {
-                utl.l(response);
 
-
-
-                utl.snack(findViewById(R.id.hold),""+response);
-
-
-
-
+                utl.snack(act,"Thanks ! ");
 
             }
 
             @Override
             public void onError(ANError ANError) {
 
+                utl.l(ANError.getErrorDetail());
             }
         });
-
-
-
     }
 
 
