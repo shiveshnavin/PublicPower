@@ -57,7 +57,7 @@ public class Feed {
         {
             return false;
         }
-        return tagList.contains(userId);
+        return tagList.contains(""+userId);
     }
     public String getCreatedAt()
     {

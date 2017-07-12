@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_upload"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="in.hoptec.ppower.Upload">
+
+
+
+
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:id="@+id/pl_c"
+        android:layout_weight="0.35"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <in.hoptec.ppower.views.GoalProgressBar
+            android:id="@+id/prog"
+            app:goalReachedColor="@color/green_600"
+            app:unfilledSectionColor="@color/grey_200"
+            app:barThickness="10dp"
+            android:layout_margin="3dp"
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+
+        <com.afollestad.easyvideoplayer.EasyVideoPlayer
+            android:layout_below="@+id/prog"
+            android:transitionName="@string/activity_image_trans"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+
+    </RelativeLayout>
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/pl_tit"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/pl_c"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <com.daniribalbert.customfontlib.views.CustomFontEditText
+            android:layout_margin="10dp"
+            android:hint="Title"
+            android:id="@+id/title"
+            android:textColor="@color/grey_900"
+            app:font="Avenir-Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        </android.support.design.widget.TextInputLayout>
+
+    </android.support.v7.widget.CardView>
+
+
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/pl_des"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/pl_tit"
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <com.daniribalbert.customfontlib.views.CustomFontEditText
+
+            android:layout_margin="20dp"
+            android:hint="Description"
+            android:id="@+id/desc"
+            android:textColor="@color/grey_900"
+            app:font="Avenir-Medium"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+</android.support.design.widget.TextInputLayout>@
+</ScrollView>
+    </android.support.v7.widget.CardView>
+
+
+    <LinearLayout
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        >
+
+        <in.hoptec.ppower.views.CircleButton
+            android:layout_gravity="center_horizontal"
+            android:padding="15dp"
+            android:src="@drawable/ic_action_tick"
+            app:cb_color="#99CC00"
+            app:cb_pressedRingWidth="8dip"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/done" />
+
+
+
+
+
+        <in.hoptec.ppower.views.CircleButton
+            android:layout_gravity="center_horizontal"
+            android:padding="17dp"
+            android:src="@drawable/cancel"
+            app:cb_color="#e53935"
+            app:cb_pressedRingWidth="8dip"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/cancel" />
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -38,9 +38,12 @@ public class Constants {
     //GET vid
     public static String API_SHARE="/api/share.php";
 
+    //GET title description user user_image user_id artwork_url stream_url
+    public static String API_UPLOAD="/api/upload_video.php";
 
 
-
+    //POST file
+    public static String API_FILE_UPLOAD="/api/file_upload.php";
 
 
     public static boolean IS_ANIMATED_BG_SPLASH=false;
@@ -57,12 +60,14 @@ public class Constants {
         ctx=context;
     }
 
-    private static String FIRE_BASE="https://test-a0930.firebaseio.com/";
+    private static String FIRE_BASE="https://cmapp1919.firebaseio.com/";
+    public static String FIRE_BASE_STORAGE="gs://cmapp1919.appspot.com";
 
     public static String fireURL()
     {
         return Constants.FIRE_BASE+ utl.refineString(ctx.getResources().getString(R.string.app_name),"");
     }
+
 
 
     public static String getFolder()

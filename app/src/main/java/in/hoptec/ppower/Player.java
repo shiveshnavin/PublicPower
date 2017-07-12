@@ -295,6 +295,7 @@ public class Player extends AppCompatActivity {
     {
 
 
+        utl.l("Playing "+url);
         player.setBottomLabelText(fed.title);
         player.setCallback(new EasyVideoCallback() {
             @Override

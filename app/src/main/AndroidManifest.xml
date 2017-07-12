@@ -12,24 +12,21 @@
 
     <application
         android:name=".BaseApp"
-        android:largeHeap="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".Splash"
-            android:theme="@style/FullScreen" >
+            android:theme="@style/FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-
-
-            </activity>
+        </activity>
 
         <!-- FACEBOOK -->
 
@@ -55,20 +52,34 @@
         </activity>
         <activity
             android:name=".Home"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".Report"
             android:label="@string/title_activity_report"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity   android:theme="@style/FullScreen" android:name=".LatestVideos"></activity>
-        <activity   android:theme="@style/FullScreen" android:name=".Player"
-
+        <activity
+            android:name=".LatestVideos"
+            android:theme="@style/FullScreen" />
+        <activity
+            android:name=".Player"
             android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"
+            android:theme="@style/FullScreen" />
+        <activity android:name=".Upload">
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="video/mp4" />
+            </intent-filter>
 
 
-            ></activity>
+
+
+
+
+        </activity>
     </application>
 
 </manifest>

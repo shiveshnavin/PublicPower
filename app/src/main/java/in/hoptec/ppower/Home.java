@@ -66,6 +66,19 @@ public class Home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                Intent intent=new Intent(ctx,Upload.class);
+                intent.putExtra("json",json);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(act,view, getString(R.string.activity_image_trans));
+                    startActivity(intent, options.toBundle());
+                }
+                else {
+                    startActivity(intent);
+                }
+
+
             }
         });
 
@@ -127,7 +140,6 @@ public class Home extends AppCompatActivity {
 
             @Override
             public void onPaused(EasyVideoPlayer player) {
-                player.pause();
 
             }
 
@@ -148,12 +160,19 @@ public class Home extends AppCompatActivity {
             @Override
             public void onBuffering(int percent) {
 
+                if(!isVisible)
+
+                {   player.pause();
+                    return;
+                }
+
                 if(percent>10&&isFirstTime) {
                     player.start();
                     player.hideControls();
                     isFirstTime=false;
 
                 }
+
 
             }
 
@@ -252,12 +271,21 @@ public class Home extends AppCompatActivity {
 
     }
 
+    public static boolean isVisible=true;
+    @Override
+    public void onResume()
+    {
+        isVisible=true;
+        super.onResume();
+    }
     @Override
     public void onPause()
     {
-        player.setLoop(false);
+       // player.setLoop(false);
 
+        isVisible=false;
         player.pause();
+
 
         super.onPause();
 
