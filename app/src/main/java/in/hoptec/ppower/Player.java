@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -15,11 +17,16 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
@@ -31,6 +38,7 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -39,6 +47,8 @@ import butterknife.ButterKnife;
 import in.hoptec.ppower.adapters.CommentAdapter;
 import in.hoptec.ppower.database.Comment;
 import in.hoptec.ppower.database.Feed;
+import uk.co.jakelee.vidsta.VidstaPlayer;
+import uk.co.jakelee.vidsta.listeners.VideoStateListeners;
 
 
 public class Player extends AppCompatActivity {
@@ -91,7 +101,12 @@ public class Player extends AppCompatActivity {
         utl.fullScreen(act);
 
         setContentView(R.layout.activity_player);
-        player = ((EasyVideoPlayer) findViewById(R.id.player));
+
+       // videoView = (VideoView) findViewById(R.id.myVideoView);
+      //  playerSurfaceView = (SurfaceView)findViewById(R.id.playersurface);
+
+        //pbLoading = (ProgressBar) findViewById(R.id.pbVideoLoading);
+
 
         user=utl.readUserData();
 
@@ -287,13 +302,76 @@ public class Player extends AppCompatActivity {
 
 
 
-
+    VideoView videoView;ProgressBar pbLoading;
     boolean forefulPause =true;
     boolean firstTime =true;
 
-    public void play(String url)
+
+    public void pause()
     {
 
+
+    }
+    public void play(final String url)
+    {
+
+        String link=url;
+        utl.l("Playing "+url);
+        VidstaPlayer player = (VidstaPlayer) findViewById(R.id.player);
+        player.setVideoSource(link);
+        player.setAutoLoop(true);
+        player.setAutoPlay(true);
+        player.setOnVideoErrorListener(new VideoStateListeners.OnVideoErrorListener() {
+            @Override
+            public void OnVideoError(int what, int extra) {
+                utl.l("what "+what+" Ex "+extra);
+            }
+        });
+        player.setOnVideoBufferingListener(new VideoStateListeners.OnVideoBufferingListener() {
+            @Override
+            public void OnVideoBuffering(VidstaPlayer evp, int buffPercent) {
+
+
+                utl.l("Buff "+buffPercent);
+
+
+
+
+            }
+        });
+
+      /*  MediaController mediaController = new MediaController(this);
+        mediaController.setAnchorView(videoView);
+        Uri video = Uri.parse(link);
+        videoView.setMediaController(mediaController);
+        videoView.setVideoURI(video);
+        videoView.start();
+
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                pbLoading.setVisibility(View.GONE);
+
+                mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                    @Override
+                    public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
+                        utl.l("Buffering : "+i);
+                    }
+                });
+            }
+        });*/
+
+
+
+
+
+
+    }
+
+    public void play(String url,boolean isEasy)
+    {
+
+        player = ((EasyVideoPlayer) findViewById(R.id.player));
 
         utl.l("Playing "+url);
         player.setBottomLabelText(fed.title);
@@ -693,6 +771,14 @@ public class Player extends AppCompatActivity {
 
 
     }
+    @Override
+    public void onPause()
+    {
+
+        pause();
+        super.onPause();
+    }
+
 
 
 

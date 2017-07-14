@@ -124,7 +124,6 @@ public class Upload extends AppCompatActivity {
 
                         @Override
                         public void done(String turl) {
-                            utl.showDig(false,Upload.this);
                             utl.l("Thumb HTG URL: "+turl);
 
                             finalli(dwdUrl,turl);
@@ -200,6 +199,9 @@ public class Upload extends AppCompatActivity {
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
+
+        des=Constants.getFolder()+"/";
+
         if (Intent.ACTION_SEND.equals(action) && type != null) {
 
              if (type.startsWith("video/")) {
@@ -207,7 +209,16 @@ public class Upload extends AppCompatActivity {
             }
         }
 
+        try {
+            Uri video=Uri.parse(getIntent().getStringExtra("uri"));
+            if(video!=null)
+            {
+                handelUri(video);
+            }
+        } catch (Exception e) {
 
+
+        }
 
 
     }
@@ -233,6 +244,7 @@ public class Upload extends AppCompatActivity {
                 utl.toast(Upload.this,"Upload Success !!");
                 utl.l(response);
                 startActivity(new Intent(Upload.this,Home.class));
+                utl.showDig(false,Upload.this);
 
                 finish();;
 
@@ -240,6 +252,7 @@ public class Upload extends AppCompatActivity {
 
             @Override
             public void onError(ANError ANError) {
+                utl.showDig(false,Upload.this);
 
                 utl.l(ANError.getErrorDetail());
 
@@ -280,11 +293,11 @@ public class Upload extends AppCompatActivity {
     {
 
         try{
-
+            startUpload(video,cb);
+/*
             player.setSource(Uri.parse(video));
             player.start();
-            duration=player.getDuration();
-            startUpload(video,cb);
+            duration=player.getDuration();*/
 /*
 
             if (mAuth.getCurrentUser() != null)
@@ -341,42 +354,38 @@ public class Upload extends AppCompatActivity {
 
     String  des;
     String  filePath;
-    private void handleSendImage(Intent intent) {
+
+    public void handelUri(final Uri video)
+    {
+        utl.l("Rec : "+video.toString());
+        ExecuterU ex=new ExecuterU(Upload.this,"Compressing...This may take a while !"){
+            @Override
+            public void doIt() {
+                super.doIt();
+                try {
+                    utl.l("HTG Compressing : "+ (video.toString()));
+                    utl.l("HTG Compressing to : "+des);
+                    filePath = SiliCompressor.with(ctx).compressVideo((video.toString()), des);
+
+                } catch ( Exception e) {
+                    e.printStackTrace();
+                }
 
 
-         final Uri video = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-            des=Constants.getFolder()+"/";
-
-         if (video != null) {
-            utl.l("Rec : "+video.toString());
-             ExecuterU ex=new ExecuterU(Upload.this,"Compressing...This may take a while !"){
-                 @Override
-                 public void doIt() {
-                     super.doIt();
-                     try {
-                         utl.l("HTG Compressing : "+ (video.toString()));
-                         utl.l("HTG Compressing to : "+des);
-                           filePath = SiliCompressor.with(ctx).compressVideo((video.toString()), des);
-
-                     } catch ( Exception e) {
-                         e.printStackTrace();
-                     }
+            }
 
 
-                 }
+            @Override
+            public void doNe() {
+                super.doNe();
+
+                processUri( (filePath) );
+                utl.l("HTG Compressed : "+filePath);
 
 
-                 @Override
-                 public void doNe() {
-                     super.doNe();
-
-                     processUri( (filePath) );
-                     utl.l("HTG Compressed : "+filePath);
-
-
-                 }
-             };
-            ex.execute();
+            }
+        };
+        ex.execute();
 /*
              try {
                  filePath=utl.getRealPathFromUri(video);
@@ -386,6 +395,15 @@ public class Upload extends AppCompatActivity {
              }
              processUri( (filePath) );*/
 
+    }
+    private void handleSendImage(Intent intent) {
+
+
+         final Uri video = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+         if (video != null) {
+
+             handelUri(video);
 
          } else{
             Toast.makeText(this, "Error occured, URI is invalid", Toast.LENGTH_LONG).show();
@@ -415,7 +433,8 @@ public class Upload extends AppCompatActivity {
     public void startThumbUpload(String path,final UploadCallBack callBack)
     {
 
-        String url=Constants.HOST+Constants.API_FILE_UPLOAD;
+
+        String url="http://feelinglone.com/test/file_upload.php";
         utl.l(url);
         File f=new File(path);
         if(f.length()<2)
@@ -423,52 +442,9 @@ public class Upload extends AppCompatActivity {
             utl.snack(Upload.this,"Empty File !");
             return;
         }
-        AndroidNetworking.post(url).addFileBody(f).build().setUploadProgressListener(new UploadProgressListener() {
-            @Override
-            public void onProgress(long bytesUploaded, long totalBytes) {
-                Double per=100.0*(bytesUploaded/totalBytes);
-                callBack.progress(per.intValue());
-            }
-        }).getAsJSONObject(new JSONObjectRequestListener() {
-            @Override
-            public void onResponse(JSONObject response) {
-
-                try {
-                    utl.snack(Upload.this,response.getString("message"));
-                    utl.l(response.toString());
-                    callBack.done(response.getString("link"));
 
 
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            @Override
-            public void onError(ANError ANError) {
-
-            }
-        });
-
-
-    }
-
-
-
-    public void startUpload(String  uri,final UploadCallBack callBack) {
-
-
-        String url=Constants.HOST+Constants.API_FILE_UPLOAD;
-        utl.l(url);
-        File f=new File(uri);
-        if(f.length()<2)
-        {
-            utl.snack(Upload.this,"Empty File !");
-            return;
-        }
-        AndroidNetworking.post(url).addFileBody(f).build().setUploadProgressListener(new UploadProgressListener() {
+        AndroidNetworking.upload(url).addMultipartFile("file",f).build().setUploadProgressListener(new UploadProgressListener() {
             @Override
             public void onProgress(long bytesUploaded, long totalBytes) {
                 Double per=100.0*(bytesUploaded/totalBytes);
@@ -480,6 +456,7 @@ public class Upload extends AppCompatActivity {
             public void onResponse(JSONObject response) {
 
                 try {
+                    callBack.progress(100);
                     utl.snack(Upload.this,response.getString("message"));
                     utl.l(response.toString());
                     callBack.done(response.getString("link"));
@@ -495,6 +472,56 @@ public class Upload extends AppCompatActivity {
             @Override
             public void onError(ANError ANError) {
 
+                utl.l(ANError.getErrorDetail());
+            }
+        });
+
+
+    }
+
+
+
+    public void startUpload(String  uri,final UploadCallBack callBack) {
+
+
+        String url="http://feelinglone.com/test/file_upload.php";
+        utl.l(url);
+        File f=new File(uri);
+        if(f.length()<2)
+        {
+            utl.snack(Upload.this,"Empty File !");
+            return;
+        }
+
+
+        AndroidNetworking.upload(url).addMultipartFile("file",f).build().setUploadProgressListener(new UploadProgressListener() {
+            @Override
+            public void onProgress(long bytesUploaded, long totalBytes) {
+                Double per=100.0*(bytesUploaded/totalBytes);
+                callBack.progress(per.intValue());
+                utl.l("Progress : "+per);
+            }
+        }).getAsString(new StringRequestListener() {
+            @Override
+            public void onResponse(String res) {
+                try {
+                    utl.l("HTG "+res);
+                    callBack.progress(100);
+                    JSONObject response=new JSONObject(res);
+                    utl.snack(Upload.this,response.getString("message"));
+                     callBack.done(response.getString("stream_link"));
+
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(ANError ANError) {
+
+                utl.l("HTG 506 ER "+ANError.getErrorBody()+"\n"+ANError.getErrorDetail());
             }
         });
 

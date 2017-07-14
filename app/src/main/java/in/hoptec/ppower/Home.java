@@ -3,11 +3,14 @@ package in.hoptec.ppower;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -20,6 +23,7 @@ import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.StringRequestListener;
 import com.iceteck.silicompressorr.SiliCompressor;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 
 import butterknife.BindView;
@@ -47,6 +51,8 @@ public class Home extends AppCompatActivity {
     public static Context ctx;
     public static Activity act;
 
+
+    public int SELECT_VIDEO=1021;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +72,12 @@ public class Home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+
+
+                Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, SELECT_VIDEO);
+
+                /*
                 Intent intent=new Intent(ctx,Upload.class);
                 intent.putExtra("json",json);
 
@@ -77,6 +89,7 @@ public class Home extends AppCompatActivity {
                 else {
                     startActivity(intent);
                 }
+*/
 
 
             }
@@ -123,7 +136,6 @@ public class Home extends AppCompatActivity {
 
         populate();
 
-        play(TEST_URL);
     }
 
     boolean isFirstTime=true;
@@ -255,6 +267,7 @@ public class Home extends AppCompatActivity {
 
 
                         json=response;
+                   //     play(TEST_URL);
 
 
                     }
@@ -284,11 +297,49 @@ public class Home extends AppCompatActivity {
        // player.setLoop(false);
 
         isVisible=false;
-        player.pause();
+        if(player.isPrepared()&&player.isPlaying())
+            player.pause();
 
 
         super.onPause();
 
     }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_VIDEO) {
+               Uri uri = (data.getData());
+
+                Intent intent=new Intent(ctx,Upload.class);
+                intent.putExtra("uri",uri.toString());
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(act,upload, getString(R.string.activity_image_trans));
+                    startActivity(intent, options.toBundle());
+                }
+                else {
+                    startActivity(intent);
+                }
+            }
+        }
+        finish();
+    }
+
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        if(cursor!=null) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+        else return null;
+    }
+
+
+
 
 }

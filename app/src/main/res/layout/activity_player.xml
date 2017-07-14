@@ -7,7 +7,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <LinearLayout
+        android:id="@+id/playerc"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
+        <uk.co.jakelee.vidsta.VidstaPlayer
+            android:id="@+id/player"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+         app:textColor = "@color/colorPrimary"
+        app:buttonTintColor = "@color/colorAccent"
+         app:setFullScreen = "true"
+        app:fullScreenButtonEnabled = "true"
+        app:fullScreenButtonVisible = "true"  />
+
+    </LinearLayout>
+<!--
     <com.afollestad.easyvideoplayer.EasyVideoPlayer
         android:transitionName="@string/activity_image_trans"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,14 +32,14 @@
         android:layout_width="match_parent"
         android:layout_height="270dp" />
 
-
+-->
 
 
 <android.support.v4.widget.NestedScrollView
     android:layout_margin="4dp"
     android:id="@+id/scrl"
 
-    android:layout_below="@id/player"
+    android:layout_below="@+id/playerc"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 

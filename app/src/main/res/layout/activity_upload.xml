@@ -33,7 +33,6 @@
 
         <com.afollestad.easyvideoplayer.EasyVideoPlayer
             android:layout_below="@+id/prog"
-            android:transitionName="@string/activity_image_trans"
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/player"
             android:layout_width="match_parent"
@@ -112,6 +111,7 @@
         <in.hoptec.ppower.views.CircleButton
             android:layout_gravity="center_horizontal"
             android:padding="15dp"
+            android:transitionName="@string/activity_image_trans"
             android:src="@drawable/ic_action_tick"
             app:cb_color="#99CC00"
             app:cb_pressedRingWidth="8dip"
