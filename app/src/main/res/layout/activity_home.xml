@@ -4,6 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_home2"
     android:orientation="vertical"
+    android:background="@color/white"
+
     android:weightSum="1"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
@@ -19,6 +21,8 @@
         android:layout_height="0dp">
 
         <RelativeLayout
+            android:background="@color/grey_400"
+
             android:orientation="vertical"
             android:id="@+id/playerc"
             android:layout_width="match_parent"
@@ -48,7 +52,6 @@
                 android:layout_height="20dp" />
 
 
-
             <com.afollestad.easyvideoplayer.EasyVideoPlayer
                 android:transitionName="@string/activity_image_trans"
                 xmlns:android="http://schemas.android.com/apk/res/android"
@@ -59,12 +62,14 @@
 
 
 
+
         </RelativeLayout>
 
     </LinearLayout>
 
 
     <LinearLayout
+        android:background="@color/white"
         android:padding="10dp"
         android:weightSum="1"
         android:orientation="vertical"

@@ -129,9 +129,22 @@ public class Home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-             //   utl.logout();
-                startActivity(new Intent(ctx,MyVideos.class));
-               // finish();
+                Intent intent=new Intent(ctx,MyVideos.class);
+                intent.putExtra("json",json);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(act,view, getString(R.string.activity_image_trans));
+                    startActivity(intent, options.toBundle());
+                }
+                else {
+                    startActivity(intent);
+                }
+
+
+
+                //   utl.logout();
+                // finish();
 
             }
         });
@@ -141,7 +154,19 @@ public class Home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                startActivity(new Intent(ctx,Report.class));
+                Intent intent=new Intent(ctx,Report.class);
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(act,view, getString(R.string.activity_image_trans));
+                    startActivity(intent, options.toBundle());
+                }
+                else {
+                    startActivity(intent);
+                }
+
+
             }
         });
 

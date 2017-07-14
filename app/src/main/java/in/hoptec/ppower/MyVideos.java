@@ -34,6 +34,7 @@ import butterknife.ButterKnife;
 import in.hoptec.ppower.adapters.MyPosterAdapter;
 import in.hoptec.ppower.adapters.PosterAdapter;
 import in.hoptec.ppower.database.Feed;
+import in.hoptec.ppower.utils.GenricCallback;
 
 public class MyVideos extends AppCompatActivity {
 
@@ -69,9 +70,11 @@ public class MyVideos extends AppCompatActivity {
         time.setText(user.extra1);
 
 
+/*
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+*/
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -79,10 +82,31 @@ public class MyVideos extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                utl.snack(findViewById(R.id.activity_my_videos), "Are you sure ? ", "LOGOUT", new GenricCallback() {
+                    @Override
+                    public void onStart() {
 
-               utl.logout();
-                startActivity(new Intent(ctx,Splash.class));
-                finish();
+                        utl.logout();
+                        startActivity(new Intent(ctx,Splash.class));
+                        finish();
+                    }
+
+                    @Override
+                    public void onDo(Object obj) {
+
+                    }
+
+                    @Override
+                    public void onDo(Object obj, Object obj2) {
+
+                    }
+
+                    @Override
+                    public void onDone(Object obj) {
+
+                    }
+                });
+
 
             }
         });
@@ -267,6 +291,7 @@ public class MyVideos extends AppCompatActivity {
             public void onResponse(String response) {
 
                 utl.snack(act,""+response);
+                getVideos("");
 
             }
 

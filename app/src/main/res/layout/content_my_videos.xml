@@ -42,7 +42,7 @@
 
 
             <in.hoptec.ppower.views.RoundedImageView
-                android:layout_margin="5dp"
+                android:layout_marginRight="5dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/more"
                 android:id="@+id/opt"
@@ -54,7 +54,7 @@
 
                 android:ellipsize="end"
                 android:id="@+id/text"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:textSize="17sp"
                 android:text="Hi ! this is me"
                 android:textColor="@color/black"
@@ -153,6 +153,7 @@
 
 
             <com.wang.avi.AVLoadingIndicatorView
+                android:transitionName="@string/activity_image_trans2"
                 android:id="@+id/splash_view2"
                 android:layout_centerInParent="true"
                 android:layout_width="wrap_content"

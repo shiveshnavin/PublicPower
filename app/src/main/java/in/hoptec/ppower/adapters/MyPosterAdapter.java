@@ -117,7 +117,7 @@ public class MyPosterAdapter extends RecyclerView.Adapter<MyPosterAdapter.Custom
                     //creating a popup menu
                     PopupMenu popup = new PopupMenu(ctx, cv.opt);
                      //inflating menu from xml resource
-                    popup.inflate(R.menu.opt);
+                    popup.inflate(R.menu.opt2);
                     //adding click listener
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
@@ -203,20 +203,7 @@ public class MyPosterAdapter extends RecyclerView.Adapter<MyPosterAdapter.Custom
                 public void onClick(View view) {
 
 
-                    utl.l("looking for  "+cat.id);
-                    utl.l("in "+MyVideos.likes);
 
-
-                    if(isLiked(cat.id))
-                    {
-                        cv.like.setImageResource(R.drawable.love);
-                        MyVideos.likes=MyVideos.likes.replace(":"+cat.id,"");
-                    }
-                    else
-                    {
-                        cv.like.setImageResource(R.drawable.loved);
-                        MyVideos.likes+=":"+cat.id;
-                    }
                     cab.like(cat,isLiked(cat.id));
                 }
             });

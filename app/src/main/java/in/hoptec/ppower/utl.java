@@ -719,6 +719,36 @@ public class utl {
 
 
 
+    public static void snack(View rootView,String t,String a,final GenricCallback cb)
+    {
+
+        Context act=rootView.getContext();
+
+        Snackbar snackbar = Snackbar.make(rootView,  ""+t, Snackbar.LENGTH_LONG);
+         snackbar.setActionTextColor(act.getResources().getColor(R.color.grey_100));
+        snackbar.setAction("" + a, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cb.onStart();
+            }
+        });
+        View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(act.getResources().getColor(R.color.red_300));
+
+        int snackbarTextId = android.support.design.R.id.snackbar_text;
+        TextView textView = (TextView)snackbarView.findViewById(snackbarTextId);
+        textView.setTextColor(Color.WHITE);
+
+        if(DISPLAY_ENABLED)
+            snackbar.show();
+
+    }
+
+
+
+
+
+
     public static interface ClickCallBack{
 
         public void done(DialogInterface dialogInterface);
