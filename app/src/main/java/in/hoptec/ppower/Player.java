@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
@@ -31,13 +32,21 @@ import android.widget.VideoView;
 import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
 import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.ANRequest;
 import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.DownloadListener;
+import com.androidnetworking.interfaces.DownloadProgressListener;
 import com.androidnetworking.interfaces.StringRequestListener;
 import com.google.gson.Gson;
+import com.liulishuo.filedownloader.BaseDownloadTask;
+import com.liulishuo.filedownloader.FileDownloadLargeFileListener;
+import com.liulishuo.filedownloader.FileDownloader;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -47,8 +56,8 @@ import butterknife.ButterKnife;
 import in.hoptec.ppower.adapters.CommentAdapter;
 import in.hoptec.ppower.database.Comment;
 import in.hoptec.ppower.database.Feed;
-import uk.co.jakelee.vidsta.VidstaPlayer;
-import uk.co.jakelee.vidsta.listeners.VideoStateListeners;
+import in.hoptec.ppower.utils.GenricCallback;
+import in.hoptec.ppower.views.GoalProgressBar;
 
 
 public class Player extends AppCompatActivity {
@@ -62,6 +71,12 @@ public class Player extends AppCompatActivity {
     private EasyVideoPlayer player;
 
 
+    @BindView(R.id.prog)
+    GoalProgressBar prog;
+
+    @BindView(R.id.load)
+    TextView load;
+
 
      @BindView(R.id.rec)
     RecyclerView rec;
@@ -69,6 +84,14 @@ public class Player extends AppCompatActivity {
      @BindView(R.id.title)
     TextView title;
 
+    @BindView(R.id.text)
+    TextView name;
+
+    @BindView(R.id.time)
+    TextView time;
+
+    @BindView(R.id.opt)
+    ImageView userimage;
 
      @BindView(R.id.desc)
     TextView desc;
@@ -99,6 +122,7 @@ public class Player extends AppCompatActivity {
         ctx=this;
         act=this;
         utl.fullScreen(act);
+        utl.init(this);
 
         setContentView(R.layout.activity_player);
 
@@ -114,7 +138,7 @@ public class Player extends AppCompatActivity {
         ButterKnife.bind(this);
         js=new Gson();
 
-        user=utl.readUserData();
+         user=utl.readUserData();
 
         String jst=getIntent().getStringExtra("cat");
         Integer vid=getIntent().getIntExtra("vid",0);
@@ -126,7 +150,7 @@ public class Player extends AppCompatActivity {
             isLiked=fed.isLiked(user.uid);
 
             set();
-            play(fed.streamUrl);
+            play(fed );
 
         }
 
@@ -237,7 +261,7 @@ public class Player extends AppCompatActivity {
                                 fed=feeds.get(i);
                                 isLiked=fed.isLiked(user.uid);
                                 set();
-                                play(fed.streamUrl);
+                                play(fed );
 
                                 break;
                             }
@@ -306,67 +330,72 @@ public class Player extends AppCompatActivity {
     boolean forefulPause =true;
     boolean firstTime =true;
 
+    @Override
+    public void onDestroy()
+    {
+        AndroidNetworking.cancel("dwd");
+        bd.cancel();
+        super.onDestroy();
+    }
 
     public void pause()
     {
 
 
     }
-    public void play(final String url)
+    BaseDownloadTask bd;
+    public void play(final Feed fed)
     {
 
-        String link=url;
-        utl.l("Playing "+url);
-        VidstaPlayer player = (VidstaPlayer) findViewById(R.id.player);
-        player.setVideoSource(link);
-        player.setAutoLoop(true);
-        player.setAutoPlay(true);
-        player.setOnVideoErrorListener(new VideoStateListeners.OnVideoErrorListener() {
-            @Override
-            public void OnVideoError(int what, int extra) {
-                utl.l("what "+what+" Ex "+extra);
-            }
-        });
-        player.setOnVideoBufferingListener(new VideoStateListeners.OnVideoBufferingListener() {
-            @Override
-            public void OnVideoBuffering(VidstaPlayer evp, int buffPercent) {
-
-
-                utl.l("Buff "+buffPercent);
-
-
-
-
-            }
-        });
-
-      /*  MediaController mediaController = new MediaController(this);
-        mediaController.setAnchorView(videoView);
-        Uri video = Uri.parse(link);
-        videoView.setMediaController(mediaController);
-        videoView.setVideoURI(video);
-        videoView.start();
-
-        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                pbLoading.setVisibility(View.GONE);
-
-                mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
-                    @Override
-                    public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
-                        utl.l("Buffering : "+i);
-                    }
-                });
-            }
-        });*/
-
-
-
-
-
+        FileDownloader.setup(ctx);
+        utl.l("Start dwd : "+fed.streamUrl);
+       bd=utl.download(fed.streamUrl,fed.getLocalFile(),dwdCallack);
+        bd.start();
 
     }
+    GenricCallback dwdCallack=new GenricCallback() {
+        @Override
+        public void onStart( ) {
+
+        }
+        @Override
+        public void onDo(Object obj) {
+            int pro=(int)obj;
+            utl.l("Progress : "+pro);
+            prog.setProgress(pro,false);
+
+            load.setText("Loaded : "+pro+" %");
+        }
+        @Override
+        public void onDo(Object obj,Object obj2) {
+            int pro=(int)obj;
+            utl.l("Progress : "+pro);
+            prog.setProgress(pro,false);
+            load.setText("Loading  "+pro+" %  "+" @ "+(int)obj2+" KB/s");
+
+        }
+
+        @Override
+        public void onDone(Object obj) {
+
+            final String url=(String)obj;
+
+            prog.setVisibility(View.GONE);
+            load.setVisibility(View.GONE);
+
+            utl.l("Plating : "+url);
+            Handler h=new Handler();
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    play(url,false);
+
+                }
+            },1000);
+
+
+        }
+    };
 
     public void play(String url,boolean isEasy)
     {
@@ -397,7 +426,6 @@ public class Player extends AppCompatActivity {
 
 
 
-               // player.start();
             }
 
             @Override
@@ -414,11 +442,25 @@ public class Player extends AppCompatActivity {
             @Override
             public void onError(EasyVideoPlayer player, Exception e) {
 
+                e.printStackTrace();
+
             }
 
             @Override
             public void onCompletion(EasyVideoPlayer player) {
 
+                try {
+                    if(player.getDuration()<1)
+                    {
+                        File f=new File(fed.getLocalFile());
+                        if(f.exists())
+                            f.delete();
+
+                        play(fed);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -435,6 +477,7 @@ public class Player extends AppCompatActivity {
         // Sets the source to the HTTP URL held in the TEST_URL variable.
         // To play files, you can use Uri.fromFile(new File("..."))
         player.setSource(Uri.parse(url));
+        player.setAutoPlay(true);
 
 
 
@@ -545,7 +588,14 @@ public class Player extends AppCompatActivity {
     {
 
         title.setText(fed.title);
-        desc.setText(fed.description+"\n\n"+fed.getCreatedAt()+"\n\n"+fed.likes+" Likes");
+        desc.setText(fed.description+"\n\n"+fed.likes+" Likes");
+        time.setText(""+fed.getCreatedAt());
+
+        name.setText(""+fed.user);
+        utl.changeColorDrawable(userimage,R.color.white);
+
+        Picasso.with(ctx).load(fed.userImage).into(userimage);
+
         if(fed.isLiked(user.uid))
         {
             like.setImageResource(R.drawable.loved);

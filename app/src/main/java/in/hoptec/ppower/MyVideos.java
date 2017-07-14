@@ -3,86 +3,95 @@ package in.hoptec.ppower;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.StringRequestListener;
-import com.mancj.materialsearchbar.MaterialSearchBar;
-import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
+import com.squareup.picasso.Picasso;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import in.hoptec.ppower.adapters.MyPosterAdapter;
 import in.hoptec.ppower.adapters.PosterAdapter;
 import in.hoptec.ppower.database.Feed;
-import in.hoptec.ppower.views.SplashView;
 
-public class LatestVideos extends AppCompatActivity {
+public class MyVideos extends AppCompatActivity {
 
     public Context ctx;
     public Activity act;
 
+    @BindView(R.id.opt)
+    ImageView userimage;
+
+    @BindView(R.id.text)
+    TextView name;
+
+    @BindView(R.id.time)
+    TextView time;
     public static String likes="";
     public static GenricUser user;
-
-    String query="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ctx=this;
-        act=this;
         utl.fullScreen(this);
 
-        setContentView(R.layout.activity_latest_videos);
+        ctx=this;
+        act=this;
+
 
         user=utl.readUserData();
-
+        setContentView(R.layout.activity_my_videos);
         bindViews();
 
-        ref.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+        Picasso.with(ctx).load(""+user.user_image).placeholder(R.drawable.user).into(userimage);
+        name.setText(user.user_fname);
+        time.setText(user.extra1);
+
+
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRefresh() {
-                getVideos(query);
+            public void onClick(View view) {
+
+
+               utl.logout();
+                startActivity(new Intent(ctx,Splash.class));
+                finish();
+
             }
         });
+        getVideos("");
+    }
 
+    void bindViews() {
 
-        String json=getIntent().getStringExtra("json");
-        if(json.length()>4)
-        {
-            parser(json);
-        }
-        else
-            getVideos(query);
-
-
-        //  parser("[{\"id\":\"2\",\"title\":\"TEST TESTTEST\",\"description\":\"TEST TEST TEST TEST TEST TEST TEST\",\"duration\":\"0\",\"user\":\"TEST\",\"user_image\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"user_id\":\"1\",\"likes\":\"0\",\"created_at\":\"2017-07-10 12:54:07\",\"artwork_url\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"stream_url\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"tag_list\":\"aa\"},{\"id\":\"3\",\"title\":\"TEST\",\"description\":\"TEST\",\"duration\":\"0\",\"user\":\"TEST\",\"user_image\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"user_id\":\"1\",\"likes\":\"0\",\"created_at\":\"2017-07-10 12:54:07\",\"artwork_url\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"stream_url\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"tag_list\":\"aa\"},{\"id\":\"1\",\"title\":\"TEST\",\"description\":\"TEST\",\"duration\":\"0\",\"user\":\"TEST\",\"user_image\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"user_id\":\"1\",\"likes\":\"0\",\"created_at\":\"2017-07-10 12:53:44\",\"artwork_url\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"stream_url\":\"https:\\/\\/lh3.googleusercontent.com\\/viOtN25XGouzS_D2uEJIBuz4AuoQLXPQ3NkIej_8NeFxhBLzndqzlpg_UM-fkSsglw=h900-rw\",\"tag_list\":\"aa\"}]");
-
-
-        setUpToolbar();
-
+        ButterKnife.bind(this);
 
     }
 
@@ -92,13 +101,6 @@ public class LatestVideos extends AppCompatActivity {
 
     @BindView(R.id.ref)
     SwipeRefreshLayout ref;
-
-
-    void bindViews() {
-
-        ButterKnife.bind(this);
-
-    }
 
 
     public void loading(boolean isLoading)
@@ -151,7 +153,8 @@ public class LatestVideos extends AppCompatActivity {
     public void getVideos(String query)
     {
         loading(true);
-        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode(query);
+        String url=Constants.HOST+Constants.API_GET_USER_VIDEOS+"?query="+ URLEncoder.encode(query)+"&user_id="+user.uid+"&city="
+                +URLEncoder.encode(utl.getCity());
         utl.l("Video : "+url);
         AndroidNetworking.get(url).build()
                 .getAsString(new StringRequestListener() {
@@ -193,7 +196,7 @@ public class LatestVideos extends AppCompatActivity {
             }
         }
 
-        PosterAdapter adapter=new PosterAdapter(ctx, videos, new PosterAdapter.CallBacks() {
+        MyPosterAdapter adapter=new MyPosterAdapter(ctx, videos, new MyPosterAdapter.CallBacks() {
             @Override
             public void share(Feed cat, int id) {
 
@@ -213,7 +216,7 @@ public class LatestVideos extends AppCompatActivity {
             public void like(Feed cat, boolean like) {
 
 
-                    likee(cat);
+                likee(cat);
 
 
             }
@@ -238,7 +241,7 @@ public class LatestVideos extends AppCompatActivity {
             }
         });
 
-       LinearLayoutManager layoutManager= new LinearLayoutManager(ctx);
+        LinearLayoutManager layoutManager= new LinearLayoutManager(ctx);
         rec.setLayoutManager(layoutManager);
         rec.setAdapter(adapter);
 
@@ -251,95 +254,11 @@ public class LatestVideos extends AppCompatActivity {
     }
 
 
-
-    @Override
-    protected void onDestroy() {
-        //save last queries to disk
-        utl.setSearches(searchBar.getLastSuggestions());
-        super.onDestroy();
-    }
-
-
-
-    @BindView(R.id.search)
-    MaterialSearchBar searchBar;
-    public void setUpToolbar()
-    {
-
-
-
-         //  searchBar.setHint("Search");
-        // searchBar.setNavButtonEnabled(false);
-
-
-        searchBar.setSpeechMode(false);
-        //enable searchbar callbacks
-        searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
-
-            @Override
-            public void onSearchStateChanged(boolean enabled) {
-                String s = enabled ? "enabled" : "disabled";
-            }
-
-            @Override
-            public void onSearchConfirmed(CharSequence text) {
-                utl.hideSoftKeyboard(act);
-                // utl.snack(act,text.toString());
-
-
-
-                loading(true);
-
-                query=text.toString();
-                getVideos(query);
-              //  utl.addSearches(query);
-
-
-
-            }
-
-            @Override
-            public void onButtonClicked(int buttonCode) {
-                switch (buttonCode) {
-                    case MaterialSearchBar.BUTTON_NAVIGATION:
-                        break;
-                    case MaterialSearchBar.BUTTON_SPEECH:
-                }
-            }
-
-        });
-        //restore last queries from disk
-
-        if(utl.getSearches()!=null)
-        {
-           List<String > list = utl.getSearches();
-            searchBar.setLastSuggestions(list);;
-            utl.l("Last Searh set "+list.size());
-
-        }
-
-
-
-        try {
-            searchBar.setTextColor(R.color.grey_700);
-            searchBar.setTextHintColor(R.color.grey_400);
-            searchBar.setHint("Search...");
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-
-
     public void likee(Feed fed)
     {
         //GET user_id vid
 
-        String url=Constants.HOST+Constants.API_LIKE+"?user_id="+user.uid+"&vid="+fed.id;
+        String url=Constants.HOST+Constants.API_REMOVE_VIDEO+"?user_id="+user.uid+"&vid="+fed.id;
         utl.l(url);
 
 
@@ -347,19 +266,17 @@ public class LatestVideos extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
 
-                utl.snack(act,"Thanks ! ");
+                utl.snack(act,""+response);
 
             }
 
             @Override
             public void onError(ANError ANError) {
 
-                    utl.l(ANError.getErrorDetail());
+                utl.l(ANError.getErrorDetail());
             }
         });
     }
-
-
 
 
 }

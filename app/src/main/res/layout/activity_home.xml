@@ -18,13 +18,48 @@
         android:layout_width="match_parent"
         android:layout_height="0dp">
 
-
-        <com.afollestad.easyvideoplayer.EasyVideoPlayer
-            android:transitionName="@string/activity_image_trans2"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/player"
+        <RelativeLayout
+            android:orientation="vertical"
+            android:id="@+id/playerc"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+
+            <com.daniribalbert.customfontlib.views.CustomFontTextView
+                app:font="avenir-next-regular"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="Loading..."
+                android:id="@+id/load"
+                android:textIsSelectable="true"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+
+            <in.hoptec.ppower.views.GoalProgressBar
+                android:layout_below="@id/load"
+                android:id="@+id/prog"
+                app:goalReachedColor="@color/green_600"
+                app:unfilledSectionColor="@color/grey_400"
+                app:barThickness="7dp"
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
+
+
+            <com.afollestad.easyvideoplayer.EasyVideoPlayer
+                android:transitionName="@string/activity_image_trans"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/player"
+                android:layout_below="@id/prog"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+
+
+        </RelativeLayout>
 
     </LinearLayout>
 

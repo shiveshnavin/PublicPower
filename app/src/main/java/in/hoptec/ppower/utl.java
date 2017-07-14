@@ -27,6 +27,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
@@ -45,10 +46,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.liulishuo.filedownloader.BaseDownloadTask;
+import com.liulishuo.filedownloader.FileDownloadSampleListener;
+import com.liulishuo.filedownloader.FileDownloader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,6 +74,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import in.hoptec.ppower.utils.FileOperations;
+import in.hoptec.ppower.utils.GenricCallback;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -92,7 +101,10 @@ public class utl {
 
     /**************************DEPENDENT**************************/
 
-
+    public static String getCity()
+    {
+        return " ";
+    }
 
     public static class SearchHistory{
         public int size;
@@ -153,6 +165,75 @@ public class utl {
     }
 
 
+
+    public static BaseDownloadTask download(String url,final String path,final  GenricCallback dwdCallack)
+    {
+         utl.l("Saving download as "+path);
+
+        return FileDownloader.getImpl().create(url)
+                .setPath(path, false)
+                .setCallbackProgressTimes(300)
+                .setMinIntervalUpdateSpeed(400)
+                .setListener(new FileDownloadSampleListener() {
+
+                    @Override
+                    protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                        super.pending(task, soFarBytes, totalBytes);
+                    }
+
+                    @Override
+                    protected void progress(BaseDownloadTask task, int bytesDownloaded, int totalBytes) {
+                        super.progress(task, bytesDownloaded, totalBytes);
+
+                         if(totalBytes==0)
+                        {
+                            totalBytes=1;
+                        }
+                        double dd=(double)bytesDownloaded/totalBytes;
+                        dd=dd*100.0;
+
+                        dwdCallack.onDo((int)dd,task.getSpeed());
+                        utl.l("Progress : "+dd+"\nSo Far   : " +bytesDownloaded+"\nTotal   : " +totalBytes+"\nDWD Speed : "+task.getSpeed());
+
+
+                    }
+
+                    @Override
+                    protected void error(BaseDownloadTask task, Throwable e) {
+                        super.error(task, e);
+                     }
+
+                    @Override
+                    protected void connected(BaseDownloadTask task, String etag, boolean isContinue, int soFarBytes, int totalBytes) {
+                        super.connected(task, etag, isContinue, soFarBytes, totalBytes);
+
+
+
+                        utl.l("DWD conne : "+task.getFilename());
+                    }
+
+                    @Override
+                    protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                        super.paused(task, soFarBytes, totalBytes);
+                     }
+
+                    @Override
+                    protected void completed(BaseDownloadTask task) {
+                        super.completed(task);
+
+                        utl.l("DWD compl : "+task.getPath()+"/"+task.getFilename());
+                        dwdCallack.onDone(path);
+
+
+                    }
+
+                    @Override
+                    protected void warn(BaseDownloadTask task) {
+                        super.warn(task);
+
+                    }
+                });
+    }
 
 
 
@@ -461,8 +542,11 @@ public class utl {
 
     public static void changeColorDrawable(ImageView imageView, @ColorRes int res) {
 
-        DrawableCompat.setTint(imageView.getDrawable(), ContextCompat.getColor(ctx, res));
-
+        try {
+            DrawableCompat.setTint(imageView.getDrawable(), ContextCompat.getColor(ctx, res));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }
@@ -662,6 +746,29 @@ public class utl {
     }
 
 
+    public static void diag(Context c,String title,String desc,boolean isCancellable,String action,final ClickCallBack click)
+    {
+
+
+
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(c);
+        alertDialogBuilder.setTitle(title);
+        alertDialogBuilder.setMessage(desc);
+        alertDialogBuilder.setCancelable(isCancellable);
+        alertDialogBuilder.setNeutralButton(action, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                click.done(dialogInterface);
+
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+
 
     public static void diag(Context c,String title,String desc)
     {
@@ -776,22 +883,34 @@ public class utl {
 
 
     public static String getRealPathFromUri(Uri uri) {
-        String result = "";
-        String documentID;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            String[] pathParts = uri.getPath().split("/");
-            documentID = pathParts[pathParts.length - 1];
-        } else {
-            String pathSegments[] = uri.getLastPathSegment().split(":");
-            documentID = pathSegments[pathSegments.length - 1];
+        String result = null;
+        try {
+            if(uri==null)
+                return null;
+
+            String documentID;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                String[] pathParts = uri.getPath().split("/");
+                documentID = pathParts[pathParts.length - 1];
+            } else {
+                String pathSegments[] = uri.getLastPathSegment().split(":");
+                documentID = pathSegments[pathSegments.length - 1];
+            }
+            String mediaPath = MediaStore.Images.Media.DATA;
+
+            Cursor imageCursor = ctx.getContentResolver().query(uri, new String[]{mediaPath}, MediaStore.Images.Media._ID + "=" + documentID, null, null);
+            if (imageCursor.moveToFirst()) {
+                result = imageCursor.getString(imageCursor.getColumnIndex(mediaPath));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        String mediaPath = MediaStore.Images.Media.DATA;
-        Cursor imageCursor = ctx.getContentResolver().query(uri, new String[]{mediaPath}, MediaStore.Images.Media._ID + "=" + documentID, null, null);
-        if (imageCursor.moveToFirst()) {
-            result = imageCursor.getString(imageCursor.getColumnIndex(mediaPath));
-        }
+        if(result==null)
+            result=uri.toString().replace("file://","");
+        utl.l("Found File path "+result);
         return result;
     }
+
 
 
 
@@ -942,6 +1061,12 @@ public class utl {
     }
 
 
+
+    public static String getFCMToken()
+    {
+        return FirebaseInstanceId.getInstance().getToken();
+
+    }
 
 
     public static GenricUser readUserData()

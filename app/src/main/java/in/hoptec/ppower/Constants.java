@@ -21,6 +21,9 @@ public class Constants {
     //GET query city
     public static String API_GET_VIDEOS="/api/latest_videos.php";
 
+    //GET query city user_id
+    public static String API_GET_USER_VIDEOS="/api/latest_videos.php";
+
     //GET vid
     public static String API_GET_COMMENTS="/api/comments.php";
 
@@ -30,8 +33,11 @@ public class Constants {
     //GET user_id vid
     public static String API_LIKE="/api/like.php";
 
+    //GET user_id vid
+    public static String API_REMOVE_VIDEO="/api/remove_video.php";
+
     //GET user user_image user_id comment extra0 extra1 title
-    //extra0 -> attachment_link extra1 -> fcm token
+    //extra0 -> attachment_link extra1 -> fcm token extra2 -> fir_no  extra3 -> ph_no
     public static String API_ADD_REPORT="/api/report.php";
 
 
@@ -73,6 +79,14 @@ public class Constants {
     public static String getFolder()
     {
         folder = Environment.getExternalStorageDirectory().getPath().toString()+"/."+ utl.refineString(ctx.getResources().getString(R.string.app_name),"");
+        return folder;
+    }
+
+
+    public static String getDwdFolder()
+    {
+        folder = Environment.getExternalStorageDirectory().getPath().toString()+"/."+ utl.refineString(ctx.getResources().getString(R.string.app_name),"")
+        +"/cache";
         return folder;
     }
 

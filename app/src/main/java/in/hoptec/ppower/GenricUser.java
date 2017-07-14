@@ -37,12 +37,17 @@ public class GenricUser {
     @SerializedName("user_created")
     @Expose
     public String user_created;
+    //fcm
     @SerializedName("extra0")
     @Expose
     public String extra0;
+
+    //phone
     @SerializedName("extra1")
     @Expose
     public String extra1;
+
+
     @SerializedName("extra2")
     @Expose
     public String extra2;

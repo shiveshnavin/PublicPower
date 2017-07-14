@@ -7,13 +7,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <LinearLayout
-        android:id="@+id/playerc"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
-        <uk.co.jakelee.vidsta.VidstaPlayer
+    <RelativeLayout
+        android:orientation="vertical"
+        android:id="@+id/playerc"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+
+        <com.daniribalbert.customfontlib.views.CustomFontTextView
+            app:font="avenir-next-regular"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="Loading..."
+            android:id="@+id/load"
+            android:textIsSelectable="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <in.hoptec.ppower.views.GoalProgressBar
+            android:layout_below="@id/load"
+            android:id="@+id/prog"
+            app:goalReachedColor="@color/green_600"
+            app:unfilledSectionColor="@color/grey_800"
+            app:barThickness="7dp"
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+
+
+        <com.afollestad.easyvideoplayer.EasyVideoPlayer
+            android:transitionName="@string/activity_image_trans"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/player"
+            android:layout_below="@id/prog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+
+    </RelativeLayout>
+<!--
+    <uk.co.jakelee.vidsta.VidstaPlayer
             android:id="@+id/player"
             android:layout_width="match_parent"
             android:layout_height="250dp"
@@ -23,14 +61,6 @@
         app:fullScreenButtonEnabled = "true"
         app:fullScreenButtonVisible = "true"  />
 
-    </LinearLayout>
-<!--
-    <com.afollestad.easyvideoplayer.EasyVideoPlayer
-        android:transitionName="@string/activity_image_trans"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/player"
-        android:layout_width="match_parent"
-        android:layout_height="270dp" />
 
 -->
 
@@ -66,9 +96,10 @@
 
 
 
-            <com.daniribalbert.customfontlib.views.CustomFontTextView
+                <com.daniribalbert.customfontlib.views.CustomFontTextView
                 app:font="avenir-next-regular"
                 android:layout_gravity="center"
+                    android:layout_marginLeft="5dp"
                 android:gravity="left"
                 android:text="Choose Login"
                 android:id="@+id/title"
@@ -106,6 +137,60 @@
 
         </android.support.v7.widget.CardView>
 
+        <android.support.v7.widget.CardView
+
+            app:cardElevation="4dp"
+            app:cardCornerRadius="3dp"
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <LinearLayout
+                android:background="@color/black"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="30dp">
+
+
+                <in.hoptec.ppower.views.RoundedImageView
+                    android:padding="5dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/user"
+                    android:id="@+id/opt"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp" />
+                <com.daniribalbert.customfontlib.views.CustomFontTextView
+
+                    android:layout_marginLeft="10dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:id="@+id/text"
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"
+                    android:text="Hi ! this is me"
+                    android:textColor="@color/grey_200"
+                    app:font="Avenir-Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+
+
+                <com.daniribalbert.customfontlib.views.CustomFontTextView
+                    android:paddingRight="10dp"
+                    android:gravity="center_vertical|right"
+                    android:layout_weight="0.8"
+                    android:id="@+id/time"
+                    android:textSize="13sp"
+                    android:text="19 July"
+                    android:textColor="@color/grey_300"
+                    app:font="Avenir-Medium"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+
+
+            </LinearLayout>
+
+            </android.support.v7.widget.CardView>
         <android.support.v7.widget.CardView
 
             app:cardElevation="4dp"

@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
@@ -22,15 +23,42 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.StringRequestListener;
 import com.iceteck.silicompressorr.SiliCompressor;
+import com.liulishuo.filedownloader.BaseDownloadTask;
+import com.liulishuo.filedownloader.FileDownloader;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import in.hoptec.ppower.database.Feed;
 import in.hoptec.ppower.utils.Bouncer;
+import in.hoptec.ppower.utils.GenricCallback;
+import in.hoptec.ppower.views.GoalProgressBar;
 
 public class Home extends AppCompatActivity {
+
+
+    /*
+    *    <com.afollestad.easyvideoplayer.EasyVideoPlayer
+            android:transitionName="@string/activity_image_trans"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/player"
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+
+
+            */
+
+    @BindView(R.id.prog)
+    GoalProgressBar prog;
+
+    @BindView(R.id.load)
+    TextView load;
+
 
 
     @BindView(R.id.upload)
@@ -52,7 +80,6 @@ public class Home extends AppCompatActivity {
     public static Activity act;
 
 
-    public int SELECT_VIDEO=1021;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +90,8 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         player = ((EasyVideoPlayer) findViewById(R.id.player));
 
+
+        player.setBottomLabelText("Trending");
         getVideos("");
 
         ButterKnife.bind(this);
@@ -99,6 +128,10 @@ public class Home extends AppCompatActivity {
         uploads.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+             //   utl.logout();
+                startActivity(new Intent(ctx,MyVideos.class));
+               // finish();
 
             }
         });
@@ -140,7 +173,7 @@ public class Home extends AppCompatActivity {
 
     boolean isFirstTime=true;
 
-    public void play(String url)
+    public void play1(String url)
     {
 
         player.setLoop(true);
@@ -254,6 +287,41 @@ public class Home extends AppCompatActivity {
     }
 
 
+
+    void parser(String response)
+    {
+
+        utl.l(response);
+        ArrayList<Feed> videos=new ArrayList<Feed>();
+
+        try {
+            JSONArray jar=new JSONArray(response);
+
+            for(int i=0;i<jar.length();i++)
+            {
+                Feed fe=utl.js.fromJson(jar.getString(i),Feed.class);
+                videos.add(fe);
+            }
+
+            if(videos.size()>0) {
+                Feed fed = videos.get(0);
+                for(int i=0;i<videos.size();i++)
+                {
+                    if(videos.get(i).getLikes()>fed.getLikes())
+                    {
+                        fed=videos.get(i);
+                    }
+                }
+
+                play(fed );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
     String json="";
     public void getVideos(String query)
     {
@@ -267,7 +335,9 @@ public class Home extends AppCompatActivity {
 
 
                         json=response;
-                   //     play(TEST_URL);
+
+                        parser(response);
+
 
 
                     }
@@ -305,6 +375,7 @@ public class Home extends AppCompatActivity {
 
     }
 
+    public int SELECT_VIDEO=1021;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -325,7 +396,6 @@ public class Home extends AppCompatActivity {
                 }
             }
         }
-        finish();
     }
 
     public String getPath(Uri uri) {
@@ -338,6 +408,137 @@ public class Home extends AppCompatActivity {
         }
         else return null;
     }
+
+
+    @Override
+    public void onDestroy()
+    {
+        AndroidNetworking.cancel("dwd");
+        bd.cancel();
+        super.onDestroy();
+    }
+
+
+    BaseDownloadTask bd;
+    public void play(final Feed fed)
+    {
+
+        FileDownloader.setup(ctx);
+        utl.l("Start dwd : "+fed.streamUrl);
+        bd=utl.download(fed.streamUrl,fed.getLocalFile(),dwdCallack);
+        bd.start();
+
+    }
+    GenricCallback dwdCallack=new GenricCallback() {
+        @Override
+        public void onStart( ) {
+
+        }
+        @Override
+        public void onDo(Object obj) {
+            int pro=(int)obj;
+            utl.l("Progress : "+pro);
+            prog.setProgress(pro,false);
+
+            load.setText("Loaded : "+pro+" %");
+        }
+        @Override
+        public void onDo(Object obj,Object obj2) {
+            int pro=(int)obj;
+            utl.l("Progress : "+pro);
+            prog.setProgress(pro,false);
+            load.setText("Loading  "+pro+" %  "+" @ "+(int)obj2+" KB/s");
+
+        }
+
+        @Override
+        public void onDone(Object obj) {
+
+            String url=(String)obj;
+
+            prog.setVisibility(View.GONE);
+            load.setVisibility(View.GONE);
+
+            utl.l("Plating : "+url);
+
+            play(url,false);
+
+        }
+    };
+
+    public void play(String url,boolean isEasy)
+    {
+
+        player = ((EasyVideoPlayer) findViewById(R.id.player));
+
+        player.setBottomLabelText("Trending");
+        utl.l("Playing "+url);
+        player.setCallback(new EasyVideoCallback() {
+            @Override
+            public void onStarted(EasyVideoPlayer player) {
+
+            }
+
+            @Override
+            public void onPaused(EasyVideoPlayer player) {
+
+
+            }
+
+            @Override
+            public void onPreparing(EasyVideoPlayer player) {
+
+            }
+
+            @Override
+            public void onPrepared(EasyVideoPlayer player) {
+
+
+
+            }
+
+            @Override
+            public void onBuffering(int percent) {
+               /* if(percent>=3&&!forefulPause) {
+                   player.start();
+                    if(firstTime){
+                        firstTime=false;
+                    player.hideControls();}
+
+                }*/
+            }
+
+            @Override
+            public void onError(EasyVideoPlayer player, Exception e) {
+
+            }
+
+            @Override
+            public void onCompletion(EasyVideoPlayer player) {
+
+            }
+
+            @Override
+            public void onRetry(EasyVideoPlayer player, Uri source) {
+
+            }
+
+            @Override
+            public void onSubmit(EasyVideoPlayer player, Uri source) {
+
+            }
+        });
+
+        // Sets the source to the HTTP URL held in the TEST_URL variable.
+        // To play files, you can use Uri.fromFile(new File("..."))
+        player.setSource(Uri.parse(url));
+        player.setAutoPlay(true);
+
+
+
+
+    }
+
 
 
 

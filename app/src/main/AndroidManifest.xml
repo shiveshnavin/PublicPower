@@ -52,7 +52,7 @@
         </activity>
         <activity
             android:name=".Home"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Report"
             android:label="@string/title_activity_report"
@@ -65,7 +65,6 @@
             android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"
             android:theme="@style/FullScreen" />
         <activity android:name=".Upload">
-
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -73,13 +72,11 @@
 
                 <data android:mimeType="video/mp4" />
             </intent-filter>
-
-
-
-
-
-
         </activity>
+        <activity
+            android:name=".MyVideos"
+            android:label="@string/title_activity_my_videos"
+            android:theme="@style/FullScreen"></activity>
     </application>
 
 </manifest>

@@ -101,6 +101,7 @@ public class Splash extends AppCompatActivity {
         initAnims();
         initFbLogin();
         initMLogin();
+        initMVerify();
         initGLogin();
 
         g_login.setOnClickListener(new View.OnClickListener() {
@@ -219,9 +220,13 @@ public class Splash extends AppCompatActivity {
                                                 img.startAnimation(rotateAnimation);
 
 */
+
                                                 if (utl.getUser() != null) {
-                                                    updateUI(utl.getUser());
-                                                    return;
+                                                    if(utl.getUser().getPhoneNumber()!=null)
+                                                    {
+                                                        updateUI(utl.getUser());
+                                                        return;
+                                                    }
                                                 }
 
                                                 utl.logout();
@@ -416,6 +421,7 @@ private class StartNextRotate implements Animation.AnimationListener {
     {
         if(firebaseUser==null)
             return;
+        this.firebaseUser=firebaseUser;
 
         GenricUser tmp=utl.readUserData();
 
@@ -445,9 +451,7 @@ private class StartNextRotate implements Animation.AnimationListener {
 
 
 
-        if(provider.contains("firebase"))
-        {
-            if(firebaseUser.getDisplayName()==null)
+            if(firebaseUser.getDisplayName()==null||firebaseUser.getDisplayName().length()<2)
             {
 
                 if(diag!=null)
@@ -455,7 +459,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                         diag.dismiss();
 
                 if(!askedForName)
-                diag=utl.inputDialog(ctx, "Login Via Phone", "Enter Your Name", utl.TYPE_DEF,new utl.InputDialogCallback() {
+                diag=utl.inputDialog(ctx, " ", "Enter Your Name", utl.TYPE_DEF,new utl.InputDialogCallback() {
                     @Override
                     public void onDone(String text) {
 
@@ -468,10 +472,27 @@ private class StartNextRotate implements Animation.AnimationListener {
                     }
                 });
 
-
+                return;
             }
-        }
 
+
+
+        try {
+            if(firebaseUser.getPhoneNumber()==null||firebaseUser.getPhoneNumber().length()<2)
+            {
+
+                if(diag!=null)
+                    if(diag.isShowing())
+                        diag.dismiss();
+
+
+                verifyViaM();
+
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
         if(firebaseUser.getDisplayName()!=null)
@@ -484,9 +505,9 @@ private class StartNextRotate implements Animation.AnimationListener {
         if(firebaseUser.getDisplayName()!=null||askedForName)
         {
 
-            if(phone!=null)
+            if(firebaseUser.getPhoneNumber()!=null)
             {
-                user.extra1=phone;
+                user.extra1=firebaseUser.getPhoneNumber();
             }
             register(user);
 
@@ -510,16 +531,16 @@ private class StartNextRotate implements Animation.AnimationListener {
             {
                 v=m_login;
             }
-
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startActivity(intent);
+/*
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP&&(logins.getVisibility()==View.VISIBLE)) {
                 ActivityOptionsCompat options = ActivityOptionsCompat.
                         makeSceneTransitionAnimation(act, v, getString(R.string.activity_image_trans));
                 startActivity(intent, options.toBundle());
             }
             else {
                 startActivity(intent);
-            }
+            }*/
 
            finish();
 
@@ -611,14 +632,25 @@ private class StartNextRotate implements Animation.AnimationListener {
     private PhoneAuthProvider.ForceResendingToken mResendToken;
 
 
-    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks,mCallbacks2;
 
 
-    private void verifyPhoneNumberWithCode(String verificationId, String code) {
+    private void verifyPhoneNumberWithCode(String verificationId, String code,boolean justVerify) {
         // [START verify_with_code]
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-        // [END verify_with_code]
-        signInWithPhoneAuthCredential(credential);
+        try {
+            PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+            // [END verify_with_code]
+            if(  justVerify)
+            {
+                verifyWithPhoneAuthCredential(credential);
+            }
+            else{
+
+                signInWithPhoneAuthCredential(credential);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }
@@ -654,6 +686,93 @@ private class StartNextRotate implements Animation.AnimationListener {
     }
 
 
+    private void verifyWithPhoneAuthCredential(final PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in firebaseUser's information
+                            Log.d(TAG, "signInWithCredential:success");
+
+                            firebaseUser=utl.getUser();
+                            if(firebaseUser!=null)
+                            firebaseUser.updatePhoneNumber(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    updateUI(firebaseUser);
+
+                                }
+                            });
+                            else
+                            {
+                                firebaseUser=task.getResult().getUser();
+                            }
+                            updateUI(firebaseUser);
+                            // [START_EXCLUDE]
+                            // [END_EXCLUDE]
+                        } else {
+                            // Sign in failed, display a message and update the UI
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                                // The verification code entered was invalid
+                                // [START_EXCLUDE silent]
+                                // [END_EXCLUDE]
+                            }
+                            // [START_EXCLUDE silent]
+                            // Update UI
+                            // [END_EXCLUDE]
+                        }
+                    }
+                });
+    }
+
+    void initMVerify()
+    {
+
+        mCallbacks2 = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+            @Override
+            public void onVerificationCompleted(PhoneAuthCredential credential) {
+
+                Log.d(TAG, "onVerificationCompleted:" + credential);
+
+                verifyWithPhoneAuthCredential(credential);
+            }
+
+            @Override
+            public void onVerificationFailed(FirebaseException e) {
+
+                Log.w(TAG, "onVerificationFailed", e);
+
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+
+                } else if (e instanceof FirebaseTooManyRequestsException) {
+
+                }
+
+            }
+
+            @Override
+            public void onCodeSent(final String verificationId,
+                                   PhoneAuthProvider.ForceResendingToken token) {
+                // The SMS verification code has been sent to the provided phone number, we
+                // now need to ask the firebaseUser to enter the code and then construct a credential
+                // by combining the code with a verification ID.
+                Log.d(TAG, "onCodeSent:" + verificationId);
+
+                mVerificationId = verificationId;
+                mResendToken = token;
+
+                diag=utl.inputDialog(ctx, "Verify Phone", "Enter OTP", utl.TYPE_DEF,new utl.InputDialogCallback() {
+                    @Override
+                    public void onDone(String text) {
+                        verifyPhoneNumberWithCode(verificationId,text,true);
+                    }
+                });
+            }
+        };
+    }
     void initMLogin()
     {
 
@@ -695,7 +814,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                 diag=utl.inputDialog(ctx, "Login Via Phone", "Enter OTP", utl.TYPE_DEF,new utl.InputDialogCallback() {
                     @Override
                     public void onDone(String text) {
-                        verifyPhoneNumberWithCode(verificationId,text);
+                        verifyPhoneNumberWithCode(verificationId,text,false);
                     }
                 });
             }
@@ -770,6 +889,115 @@ private class StartNextRotate implements Animation.AnimationListener {
 
 
     }
+
+    boolean askedOnce=false;
+    void verifyViaM()
+    {
+
+        if(askedOnce)
+            return;
+        askedOnce=true;
+
+        utl.showDig(true,ctx);
+        AndroidNetworking.get("http://www.thehoproject.co.nf/status.php?action=check_phone_login&app="+
+                URLEncoder.encode(getResources().getString(R.string.app_name))).build()
+                .getAsString(new StringRequestListener() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        utl.showDig(false,ctx);
+                        utl.l(response);
+
+                        if(response.contains("notcool"))
+                        {
+                            utl.snack(act,"Phone Login is Disabled !");
+                            return;
+                        }
+                        firebaseUser =utl.getUser();
+                        if(firebaseUser !=null)
+                        {
+                            if(firebaseUser.getPhoneNumber()!=null)
+                                if(firebaseUser.getPhoneNumber().length()>3) {
+                                    updateUI(firebaseUser);
+                                    return;
+                                }
+                        }
+
+                        utl.inputDialog(ctx, "Verify Phone", "Enter Phone No :",utl.TYPE_PHONE,new utl.InputDialogCallback() {
+                            @Override
+                            public void onDone(String text) {
+
+                                if(!utl.isValidMobile(text)) {
+                                    utl.toast(ctx, "Invalid Phone !");
+                                    return;
+                                }
+
+                                PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                                        text,        // Phone number to verify
+                                        120,                 // Timeout duration
+                                        TimeUnit.SECONDS,   // Unit of timeout
+                                        act,               // Activity (for callback binding)
+                                        mCallbacks2);
+
+
+                            }
+                        });
+
+
+
+                    }
+
+                    @Override
+                    public void onError(ANError ANError) {
+
+
+                        firebaseUser =utl.getUser();
+                        if(firebaseUser !=null)
+                        {
+                            if(firebaseUser.getPhoneNumber()!=null)
+                                if(firebaseUser.getPhoneNumber().length()>3) {
+                                    updateUI(firebaseUser);
+                                    return;
+                                }
+                        }
+
+                        utl.inputDialog(ctx, "Verify Phone", "Enter Phone No :",utl.TYPE_PHONE,new utl.InputDialogCallback() {
+                            @Override
+                            public void onDone(String text) {
+
+                                if(!utl.isValidMobile(text)) {
+                                    utl.toast(ctx, "Invalid Phone !");
+                                    return;
+                                }
+
+                                PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                                        text,        // Phone number to verify
+                                        120,                 // Timeout duration
+                                        TimeUnit.SECONDS,   // Unit of timeout
+                                        act,               // Activity (for callback binding)
+                                        mCallbacks2);
+
+
+                            }
+                        });
+
+
+
+
+                        utl.showDig(false,ctx);
+                        utl.l(ANError.getErrorDetail());
+                    }
+                });
+
+
+
+
+
+
+
+
+    }
+
 
     //************************M LOGIN***********************/
 

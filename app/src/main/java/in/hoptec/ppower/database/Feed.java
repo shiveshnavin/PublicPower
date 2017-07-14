@@ -1,11 +1,18 @@
 package in.hoptec.ppower.database;
 
+import android.net.Uri;
+import android.os.SystemClock;
+import android.webkit.URLUtil;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import in.hoptec.ppower.Constants;
+import in.hoptec.ppower.utl;
 
 /**
  * Created by shivesh on 14/6/17.
@@ -104,9 +111,42 @@ public class Feed {
     }
 
 
+    public String getFileName()
+    {
+        String file="test_"+ SystemClock.uptimeMillis()+".mp4";
+
+        if(streamUrl.contains("?"))
+        {
+        Uri uri= Uri.parse(streamUrl);
+            file= uri.getQueryParameter("file");
+        }
+        else {
+            file= URLUtil.guessFileName(streamUrl, null, null);
+        }
+
+        if(file==null)
+        {
+            file=utl.refineString(user+"_"+title,"_")+".mp4";
+        }
+
+        utl.l("Name  : "+title+"\nFile : "+file+"\nURL : "+streamUrl);
+
+        return file;
+    }
 
 
+    public int getLikes()
+    {
 
+        return Integer.parseInt(likes);
+    }
+
+    public String getLocalFile()
+    {
+        final String path= Constants.getDwdFolder()+"/"+getFileName().hashCode();
+
+        return  path;
+    }
 
 
 

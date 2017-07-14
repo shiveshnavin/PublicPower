@@ -177,6 +177,7 @@ public class Upload extends AppCompatActivity {
             @Override
             public void onError(EasyVideoPlayer player, Exception e) {
 
+                e.printStackTrace();
             }
 
             @Override
@@ -274,8 +275,6 @@ public class Upload extends AppCompatActivity {
             uploadFinished=true;
 
             prog.setProgress(100);
-            player.setSource(Uri.parse(dwdurl));
-            player.start();
         }
 
         @Override
@@ -291,6 +290,8 @@ public class Upload extends AppCompatActivity {
 
     public void processUri(final String  video)
     {
+        player.setSource(Uri.parse(video));
+        player.start();
 
         try{
             startUpload(video,cb);
@@ -497,9 +498,10 @@ public class Upload extends AppCompatActivity {
         AndroidNetworking.upload(url).addMultipartFile("file",f).build().setUploadProgressListener(new UploadProgressListener() {
             @Override
             public void onProgress(long bytesUploaded, long totalBytes) {
-                Double per=100.0*(bytesUploaded/totalBytes);
-                callBack.progress(per.intValue());
-                utl.l("Progress : "+per);
+                double dd=(double)bytesUploaded/totalBytes;
+                dd=dd*100.0;
+                 callBack.progress((int)dd);
+                utl.l("Progress : "+dd);
             }
         }).getAsString(new StringRequestListener() {
             @Override
@@ -521,6 +523,7 @@ public class Upload extends AppCompatActivity {
             @Override
             public void onError(ANError ANError) {
 
+                utl.snack(Upload.this,"Network Error ! Please try again !");
                 utl.l("HTG 506 ER "+ANError.getErrorBody()+"\n"+ANError.getErrorDetail());
             }
         });
