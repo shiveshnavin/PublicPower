@@ -25,7 +25,6 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
-        android:transitionName="@string/activity_image_trans2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

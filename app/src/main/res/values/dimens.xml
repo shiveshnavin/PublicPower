@@ -11,6 +11,7 @@
 
 
     <dimen name="rounded_corner_rad">30dp</dimen>
+    <dimen name="sqr_corner_rad">4dp</dimen>
 
 
     <dimen name="home_items_text_size">12sp</dimen>

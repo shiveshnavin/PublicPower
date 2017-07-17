@@ -30,6 +30,7 @@ import java.util.List;
 
 
 import in.hoptec.ppower.Home;
+import in.hoptec.ppower.LatestVideos;
 import in.hoptec.ppower.R;
 import in.hoptec.ppower.utils.NotificationExtras;
 import in.hoptec.ppower.utl;
@@ -46,24 +47,24 @@ public class MyAndroidFirebaseMsgService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-        Log.d(TAG, "Notification Message Body: " + remoteMessage.getNotification().getBody());
+        Log.d(TAG, "Notification Message Body: " + remoteMessage.toString());
 
          ctx=this;
          utl.init(ctx);
 
 
-
+        createNotification(remoteMessage);
     }
 
     Gson js;
     Context ctx;
-
+    int nott=1;
     private void createNotification( RemoteMessage remoteMessage) {
         try {
-         //   String mess=remoteMessage.getNotification().getBody();
+            //   String mess=remoteMessage.getNotification().getBody();
 
 
-            Intent intent = new Intent( this , Home. class );
+            Intent intent = new Intent( this , LatestVideos. class );
 
 
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -82,19 +83,22 @@ public class MyAndroidFirebaseMsgService extends FirebaseMessagingService {
                     .setContentText(""+remoteMessage.getData().get("text"))
                     .setAutoCancel( true )
                     .setSound(notificationSoundURI)
-                    .setContentInfo("Wootout")
+                    .setContentInfo("PPower")
                     .setContentIntent(isLoggedIn?resultIntent: PendingIntent.getActivity( this , 0, new Intent(ctx, Home.class),
                             PendingIntent.FLAG_ONE_SHOT));
 
 
-            Notification n = NotificationExtras.buildWithBackgroundColor(ctx, b, getResources().getColor(R.color.green_400));
-            NotificationManagerCompat.from(this).notify(1, n);
+            Notification n = NotificationExtras.buildWithBackgroundColor(ctx, b, getResources().getColor(R.color.grey_500));
+            NotificationManagerCompat.from(this).notify(++nott
+                    , n);
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+
 
 
 

@@ -3,6 +3,7 @@ package in.hoptec.ppower;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -69,8 +70,8 @@ public class LatestVideos extends AppCompatActivity {
         });
 
 
-        String json=getIntent().getStringExtra("json");
-        if(json.length()>4)
+        String json=""+getIntent().getStringExtra("json");
+        if(json.length()>10)
         {
             parser(json);
         }
@@ -146,12 +147,27 @@ public class LatestVideos extends AppCompatActivity {
 
 
     }
-
+/*
+    @Override
+    public void onBackPressed()
+    {
+        finish();
+    }*/
 
     public void getVideos(String query)
     {
         loading(true);
-        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode(query);
+        Location loc=null;
+        String  locj=utl.readFile("loc");
+        if(locj!=null) {
+
+            loc=utl.js.fromJson(locj,Location.class);
+
+        }
+        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode(query)
+                + "&location=" + URLEncoder.encode(loc!=null?loc.getLatitude()+","+loc.getLongitude():"28.592,76.990");;
+
+
         utl.l("Video : "+url);
         AndroidNetworking.get(url).build()
                 .getAsString(new StringRequestListener() {

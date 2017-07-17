@@ -56,12 +56,33 @@
                 android:transitionName="@string/activity_image_trans"
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/player"
-                android:layout_below="@id/prog"
+                android:layout_above="@+id/trend"
+                android:layout_below="@+id/prog"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
 
 
+
+            <com.daniribalbert.customfontlib.views.CustomFontTextView
+                app:font="Avenir-Medium"
+                android:background="@color/black"
+                android:textSize="14sp"
+                android:id="@+id/trend"
+                android:layout_alignParentBottom="true"
+                android:textColor="@color/grey_200"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit ="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"
+                android:text="Trending"
+                android:padding="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
         </RelativeLayout>
 
@@ -98,7 +119,7 @@
                 android:padding="14dp"
                 android:layout_width="@dimen/home_items_image"
                 android:layout_height="@dimen/home_items_image"
-                android:background="@drawable/rounded_selector"
+                android:background="@drawable/sqr_selector"
                 android:layout_centerInParent="true"
                 android:src="@drawable/videos_1"
                 android:id="@+id/imageView" />
@@ -139,7 +160,7 @@
                 android:padding="14dp"
                 android:layout_width="@dimen/home_items_image"
                 android:layout_height="@dimen/home_items_image"
-                android:background="@drawable/rounded_selector"
+                android:background="@drawable/sqr_selector"
                 android:id="@+id/imageView2" />
 
             <com.daniribalbert.customfontlib.views.CustomFontTextView
@@ -189,7 +210,7 @@
                 android:padding="14dp"
                 android:layout_width="@dimen/home_items_image"
                 android:layout_height="@dimen/home_items_image"
-                android:background="@drawable/rounded_selector"
+                android:background="@drawable/sqr_selector"
                 android:id="@+id/imageViewu" />
 
             <com.daniribalbert.customfontlib.views.CustomFontTextView
@@ -226,7 +247,7 @@
                 android:padding="14dp"
                 android:layout_width="@dimen/home_items_image"
                 android:layout_height="@dimen/home_items_image"
-                android:background="@drawable/rounded_selector"
+                android:background="@drawable/sqr_selector"
                 android:id="@+id/imageView2s" />
 
             <com.daniribalbert.customfontlib.views.CustomFontTextView

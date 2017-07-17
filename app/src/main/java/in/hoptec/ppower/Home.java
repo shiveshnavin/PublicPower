@@ -2,14 +2,22 @@ package in.hoptec.ppower;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,16 +29,23 @@ import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.androidnetworking.interfaces.StringRequestListener;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.iceteck.silicompressorr.SiliCompressor;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloader;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,6 +53,8 @@ import in.hoptec.ppower.database.Feed;
 import in.hoptec.ppower.utils.Bouncer;
 import in.hoptec.ppower.utils.GenricCallback;
 import in.hoptec.ppower.views.GoalProgressBar;
+
+import static in.hoptec.ppower.BaseApp.mFusedLocationClient;
 
 public class Home extends AppCompatActivity {
 
@@ -59,7 +76,12 @@ public class Home extends AppCompatActivity {
     @BindView(R.id.load)
     TextView load;
 
+    @BindView(R.id.city)
+    TextView city;
 
+
+    @BindView(R.id.trend)
+    TextView trend;
 
     @BindView(R.id.upload)
     View upload;
@@ -83,12 +105,38 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ctx=this;
-        act=this;
+        ctx = this;
+        act = this;
         utl.init(ctx);
         utl.fullScreen(this);
         setContentView(R.layout.activity_home);
         player = ((EasyVideoPlayer) findViewById(R.id.player));
+
+        utl.l("Permit : "+checkLocationPermission());
+
+        FirebaseMessaging.getInstance().subscribeToTopic("allDevices");
+        FirebaseMessaging.getInstance().subscribeToTopic("content");
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
+        try {
+            //noinspection MissingPermission
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+
+                                utl.l("Location : "+location);
+                                utl.writeFile("loc",utl.js.toJson(location));
+
+
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
         player.setBottomLabelText("Trending");
@@ -278,6 +326,7 @@ public class Home extends AppCompatActivity {
 
     void populate()
     {
+        getCity();
         View[] views = new View[] {latest,report, upload,uploads };
 
 // 100ms delay between Animations
@@ -329,7 +378,7 @@ public class Home extends AppCompatActivity {
             }
 
             if(videos.size()>0) {
-                Feed fed = videos.get(0);
+               Feed fed = videos.get(0);
                 for(int i=0;i<videos.size();i++)
                 {
                     if(videos.get(i).getLikes()>fed.getLikes())
@@ -337,8 +386,38 @@ public class Home extends AppCompatActivity {
                         fed=videos.get(i);
                     }
                 }
+                final Feed feed=fed;
+                play(feed );
 
-                play(fed );
+
+                trend.setText(fed.title );
+
+
+
+
+
+
+
+                trend.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        Intent intent=new Intent(ctx,Player.class);
+                        intent.putExtra("cat",utl.js.toJson(feed));
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            ActivityOptionsCompat options = ActivityOptionsCompat.
+                                    makeSceneTransitionAnimation(act, player, getString(R.string.activity_image_trans));
+                            startActivity(intent, options.toBundle());
+                        }
+                        else {
+                            startActivity(intent);
+                        }
+
+                    }
+                });
+
+
             }
 
         } catch (Exception e) {
@@ -347,11 +426,72 @@ public class Home extends AppCompatActivity {
 
 
     }
+
     String json="";
+    public void getCity ()   {
+
+        Location loc=null;
+        String  locj=utl.readFile("loc");
+        if(locj!=null) {
+
+            loc=utl.js.fromJson(locj,Location.class);
+            city.setText(loc.getLatitude()+","+loc.getLongitude());
+        }
+
+        String url="http://maps.googleapis.com/maps/api/geocode/json?latlng="+(loc!=null?loc.getLatitude()+","+loc.getLongitude():"28.592,76.990")+"&sensor=true";
+        utl.l(url);
+        AndroidNetworking.get(url).build().getAsJSONObject(new JSONObjectRequestListener() {
+            @Override
+            public void onResponse(JSONObject jsonObj) {
+
+                try {
+                    String Status = jsonObj.getString("status");
+                    if (Status.equalsIgnoreCase("OK")) {
+                        JSONArray Results = jsonObj.getJSONArray("results");
+                        JSONObject zero = Results.getJSONObject(0);
+                        JSONArray address_components = zero
+                                .getJSONArray("address_components");
+
+                        for (int i = 0; i < address_components.length(); i++) {
+                            JSONObject zero2 = address_components
+                                    .getJSONObject(i);
+                            String long_name = zero2.getString("long_name");
+                            JSONArray mtypes = zero2.getJSONArray("types");
+                            String Type = mtypes.getString(0);
+                            if (Type.equalsIgnoreCase("administrative_area_level_1")) {
+                                // Address2 = Address2 + long_name + ", ";
+                                String City = long_name;
+                                Log.d(" CityName --->", City + "");
+                                city.setText(City);
+
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(ANError ANError) {
+
+            }
+        });
+
+    }
     public void getVideos(String query)
     {
+        Location loc=null;
+        String  locj=utl.readFile("loc");
+        if(locj!=null) {
 
-        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode(query);
+            loc=utl.js.fromJson(locj,Location.class);
+
+        }
+        String url=Constants.HOST+Constants.API_GET_VIDEOS+"?query="+ URLEncoder.encode(query)
+                + "&location=" + URLEncoder.encode(loc!=null?loc.getLatitude()+","+loc.getLongitude():"28.592,76.990");;
+
+
         utl.l("Video : "+url);
         AndroidNetworking.get(url).build()
                 .getAsString(new StringRequestListener() {
@@ -438,8 +578,12 @@ public class Home extends AppCompatActivity {
     @Override
     public void onDestroy()
     {
-        AndroidNetworking.cancel("dwd");
-        bd.cancel();
+        try {
+            AndroidNetworking.cancel("dwd");
+            bd.cancel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         super.onDestroy();
     }
 
@@ -564,6 +708,82 @@ public class Home extends AppCompatActivity {
 
     }
 
+
+
+
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission. ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission. ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle("")
+                        .setMessage("Please Grant Permission for Coarse Location .")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(act,
+                                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission. ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                        //Request location updates:
+
+
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                }
+                return;
+            }
+
+        }
+    }
 
 
 

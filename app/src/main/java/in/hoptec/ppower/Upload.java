@@ -1,6 +1,7 @@
 package in.hoptec.ppower;
 
 import android.content.Intent;
+import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.SystemClock;
@@ -45,6 +46,7 @@ import java.net.URLEncoder;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import in.hoptec.ppower.utils.ExecuterU;
+import in.hoptec.ppower.utils.GenricCallback;
 import in.hoptec.ppower.views.CustomProgress;
 import in.hoptec.ppower.views.GoalProgressBar;
 
@@ -77,7 +79,7 @@ public class Upload extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         utl.init(this);
         setContentView(R.layout.activity_upload);
-
+        AndroidNetworking.initialize(this);
         user=utl.readUserData();
         ButterKnife.bind(this);
         mAuth=FirebaseAuth.getInstance();
@@ -226,16 +228,23 @@ public class Upload extends AppCompatActivity {
 
     public void finalli(String dwdUrl,String thumbUrl){
 
-        String url=Constants.HOST+Constants.API_UPLOAD+"?"
-                +"title="+ URLEncoder.encode(""+title.getText().toString())
-                +"&description="+ URLEncoder.encode(""+desc.getText().toString())
-                +"&user="+ URLEncoder.encode(""+user.user_fname)
-                +"&duration="+(duration)
-                +"&user_image="+ URLEncoder.encode(""+user.user_image)
-                +"&user_id="+ URLEncoder.encode(""+user.uid)
-                +"&artwork_url="+ URLEncoder.encode(thumbUrl)
-                +"&stream_url="+ URLEncoder.encode(dwdUrl)
-                ;
+        Location loc=null;
+        String  locj=utl.readFile("loc");
+        if(locj!=null) {
+
+            loc=utl.js.fromJson(locj,Location.class);
+
+        }
+            String url = Constants.HOST + Constants.API_UPLOAD + "?"
+                    + "title=" + URLEncoder.encode("" + title.getText().toString())
+                    + "&description=" + URLEncoder.encode("" + desc.getText().toString())
+                    + "&user=" + URLEncoder.encode("" + user.user_fname)
+                    + "&duration=" + (duration)
+                    + "&user_image=" + URLEncoder.encode("" + user.user_image)
+                    + "&user_id=" + URLEncoder.encode("" + user.uid)
+                    + "&artwork_url=" + URLEncoder.encode(thumbUrl)
+                    + "&stream_url=" + URLEncoder.encode(dwdUrl)
+                    + "&location=" + URLEncoder.encode(loc!=null?loc.getLatitude()+","+loc.getLongitude():"28.592,76.990");
 
         utl.l(url);
         ANRequest.GetRequestBuilder get=new ANRequest.GetRequestBuilder(url);
@@ -263,8 +272,10 @@ public class Upload extends AppCompatActivity {
     UploadCallBack cb= new UploadCallBack() {
         @Override
         public void progress(int percent) {
-            prog.setProgress(percent);
+            prog.setProgress(percent,false);
+            progress=percent;
 
+            setTitle("Uploading : "+title.getText());
         }
 
         @Override
@@ -274,7 +285,10 @@ public class Upload extends AppCompatActivity {
             dwdUrl=dwdurl;
             uploadFinished=true;
 
+            setTitle("Uploaded : "+title.getText());
             prog.setProgress(100);
+            progress=100;
+
         }
 
         @Override
@@ -450,7 +464,7 @@ public class Upload extends AppCompatActivity {
             public void onProgress(long bytesUploaded, long totalBytes) {
                 Double per=100.0*(bytesUploaded/totalBytes);
                 callBack.progress(per.intValue());
-                utl.l("Progress : "+per);
+                utl.l("Progress : "+per+"\nUploaded : "+bytesUploaded+"\nTotal : "+totalBytes);
             }
         }).getAsJSONObject(new JSONObjectRequestListener() {
             @Override
@@ -481,8 +495,8 @@ public class Upload extends AppCompatActivity {
     }
 
 
-
-    public void startUpload(String  uri,final UploadCallBack callBack) {
+    int progress=0;
+    public void startUpload(final String  uri,final UploadCallBack callBack) {
 
 
         String url="http://feelinglone.com/test/file_upload.php";
@@ -498,10 +512,10 @@ public class Upload extends AppCompatActivity {
         AndroidNetworking.upload(url).addMultipartFile("file",f).build().setUploadProgressListener(new UploadProgressListener() {
             @Override
             public void onProgress(long bytesUploaded, long totalBytes) {
-                double dd=(double)bytesUploaded/totalBytes;
-                dd=dd*100.0;
-                 callBack.progress((int)dd);
-                utl.l("Progress : "+dd);
+                double per=(double)bytesUploaded/totalBytes;
+                per=per*100.0;
+                 callBack.progress((int)per);
+                utl.l("Progress : "+per+"\nUploaded : "+bytesUploaded+"\nTotal : "+totalBytes);
             }
         }).getAsString(new StringRequestListener() {
             @Override
@@ -523,7 +537,35 @@ public class Upload extends AppCompatActivity {
             @Override
             public void onError(ANError ANError) {
 
-                utl.snack(Upload.this,"Network Error ! Please try again !");
+                if(progress>1)
+                {
+                    utl.snack(Upload.this,"Network Error ! Trying Again...");
+                    startUpload( uri, callBack);
+                }
+                else {
+                    utl.snack(findViewById(R.id.activity_upload),  "Couldn't Upload Due to Poor Network ! Try Again","CANCEL", new GenricCallback() {
+                        @Override
+                        public void onStart() {
+                            finish();
+                        }
+
+                        @Override
+                        public void onDo(Object obj) {
+
+                        }
+
+                        @Override
+                        public void onDo(Object obj, Object obj2) {
+
+                        }
+
+                        @Override
+                        public void onDone(Object obj) {
+
+                        }
+                    });
+
+                }
                 utl.l("HTG 506 ER "+ANError.getErrorBody()+"\n"+ANError.getErrorDetail());
             }
         });

@@ -1037,6 +1037,36 @@ public class utl {
 
 
 
+    public static  boolean writeFile(String file,String text)
+    {
+
+        String data= Constants.folder+"/"+file;
+        FileOperations fop=new FileOperations();
+        Gson g=new Gson();
+        fop.write(data,text);
+        Log.d("DATA WROTE",""+fop.read(data));
+        return  true;
+    }
+
+
+
+
+    public static String readFile(String file)
+    {
+        String data= Constants.folder+"/"+file;
+        if(!new File(data).exists())
+            return null;
+        FileOperations fop=new FileOperations();
+
+        Log.d("DATA READ",""+fop.read(data));
+        return  fop.read(data);
+
+
+
+    }
+
+
+
 
     public static  boolean removeData()
     {

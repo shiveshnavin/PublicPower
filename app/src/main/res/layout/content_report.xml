@@ -94,6 +94,8 @@
             <com.daniribalbert.customfontlib.views.CustomFontEditText   android:singleLine="true"
                 android:textSize="16sp"
                 app:font="Avenir-Medium"
+                android:transitionName="@string/activity_image_trans2"
+
                 android:id="@+id/casee"
                 android:inputType="textEmailAddress"
                 android:layout_width="match_parent"
