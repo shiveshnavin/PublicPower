@@ -110,6 +110,44 @@ public class MyVideos extends AppCompatActivity {
 
             }
         });
+
+
+
+
+
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                utl.snack(findViewById(R.id.activity_my_videos), "Clear cache ? ", "CLEAR", new GenricCallback() {
+                    @Override
+                    public void onStart() {
+
+                        utl.clearCache();
+                        utl.snack(act,"Cache Cleared !");
+
+                    }
+
+                    @Override
+                    public void onDo(Object obj) {
+
+                    }
+
+                    @Override
+                    public void onDo(Object obj, Object obj2) {
+
+                    }
+
+                    @Override
+                    public void onDone(Object obj) {
+
+                    }
+                });
+
+
+            }
+        });
         getVideos("");
     }
 

@@ -657,6 +657,8 @@ private class StartNextRotate implements Animation.AnimationListener {
 
     // [START sign_in_with_phone]
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+
+        utl.showDig(true,ctx);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -687,6 +689,8 @@ private class StartNextRotate implements Animation.AnimationListener {
 
 
     private void verifyWithPhoneAuthCredential(final PhoneAuthCredential credential) {
+
+        utl.showDig(true,ctx);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -743,6 +747,7 @@ private class StartNextRotate implements Animation.AnimationListener {
             @Override
             public void onVerificationFailed(FirebaseException e) {
 
+                utl.showDig(false,ctx);
                 Log.w(TAG, "onVerificationFailed", e);
 
                 if (e instanceof FirebaseAuthInvalidCredentialsException) {
@@ -761,6 +766,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                 // by combining the code with a verification ID.
                 Log.d(TAG, "onCodeSent:" + verificationId);
 
+                utl.showDig(false,ctx);
                 mVerificationId = verificationId;
                 mResendToken = token;
 
@@ -857,7 +863,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                                     utl.toast(ctx, "Invalid Phone !");
                                     return;
                                 }
-
+                                utl.showDig(true,ctx);
                                 PhoneAuthProvider.getInstance().verifyPhoneNumber(
                                         text,        // Phone number to verify
                                         120,                 // Timeout duration
@@ -931,6 +937,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                                     utl.toast(ctx, "Invalid Phone !");
                                     return;
                                 }
+                                utl.showDig(true,ctx);
 
                                 PhoneAuthProvider.getInstance().verifyPhoneNumber(
                                         text,        // Phone number to verify
@@ -970,6 +977,7 @@ private class StartNextRotate implements Animation.AnimationListener {
                                     return;
                                 }
 
+                                utl.showDig(true,ctx);
                                 PhoneAuthProvider.getInstance().verifyPhoneNumber(
                                         text,        // Phone number to verify
                                         120,                 // Timeout duration
@@ -1364,6 +1372,14 @@ private class StartNextRotate implements Animation.AnimationListener {
         }
     }
 
+
+    @Override
+    public void onDestroy()
+    {
+
+        utl.showDig(false,ctx);
+        super.onDestroy();
+    }
 
 
 

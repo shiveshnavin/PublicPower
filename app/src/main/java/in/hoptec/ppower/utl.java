@@ -57,6 +57,7 @@ import com.google.gson.JsonSyntaxException;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -524,6 +525,7 @@ public class utl {
         }
 
     }
+
 
 
     public static int getApkVerison(Context ctx)
@@ -1065,6 +1067,30 @@ public class utl {
 
     }
 
+    public static void clearCache()
+    {
+
+        File cache=new File(Constants.getDwdFolder());
+        for(File f: cache.listFiles())
+        {
+
+                f.delete();
+
+        }
+
+
+        File folder=new File(Constants.getFolder());
+        for(File f: folder.listFiles())
+        {
+            if(f.getName().contains(".mp4")||f.getName().contains(".png"))
+            {
+                f.delete();
+            }
+        }
+
+
+
+    }
 
 
 
@@ -1176,14 +1202,15 @@ public class utl {
                 dialog.getWindow().getAttributes().alpha = 0.7f;
 
 
-
-                dialog.setTitle("Select Content Language");
-
                 dialog.setContentView(R.layout.gen_load);
                 //  dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.setCancelable(true);
+
                 dialog.show();
+                AVLoadingIndicatorView splashView=(AVLoadingIndicatorView)dialog.findViewById(R.id.splash_view2);
+                splashView.show();
+
 
             }
             else   {

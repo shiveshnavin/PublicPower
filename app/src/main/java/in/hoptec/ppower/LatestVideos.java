@@ -110,6 +110,7 @@ public class LatestVideos extends AppCompatActivity {
         if(isLoading)
         {
             splashView.show();
+
             rec.setVisibility(View.INVISIBLE);
 
 
