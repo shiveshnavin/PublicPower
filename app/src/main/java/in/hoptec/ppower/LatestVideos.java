@@ -200,6 +200,7 @@ public class LatestVideos extends AppCompatActivity {
     {
 
         ref.setRefreshing(false);
+        loading(false);
 
         for(int i=0;i<videos.size();i++)
         {

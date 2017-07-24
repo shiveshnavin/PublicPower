@@ -1015,7 +1015,7 @@ private class StartNextRotate implements Animation.AnimationListener {
 
         if(tmpusr.user_email==null)
         {
-            tmpusr.user_email="default@example.com";
+            tmpusr.user_email=firebaseUser.getUid()+"@firebase.com";
 
         }
 
@@ -1040,7 +1040,7 @@ private class StartNextRotate implements Animation.AnimationListener {
 
         if(tmpusr.user_email.length()<2)
         {
-            tmpusr.user_email="default@example.com";
+            tmpusr.user_email=firebaseUser.getUid()+"@firebase.com";
 
         }
 
