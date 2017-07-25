@@ -938,7 +938,7 @@ public class utl {
             e.printStackTrace();
         }
         if(result==null)
-            result=uri.toString().replace("file://","");
+            result=uri.getPath().replace("file://","").replace("%20"," ");
         utl.l("Found File path "+result);
         return result;
     }

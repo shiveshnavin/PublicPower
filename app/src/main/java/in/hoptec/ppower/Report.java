@@ -112,6 +112,7 @@ public class Report extends AppCompatActivity {
         });
     }
     public void send() {
+        utl.showDig(true,ctx);
         if (path != null)
             startThumbUpload(path, new Upload.UploadCallBack() {
                 @Override
@@ -165,6 +166,7 @@ public class Report extends AppCompatActivity {
         AndroidNetworking.get(url).build().getAsString(new StringRequestListener() {
             @Override
             public void onResponse(String response) {
+                utl.showDig(false,ctx);
 
                 utl.diag(ctx, "Sent ! ", "" + response,false, "FINISH", new utl.ClickCallBack() {
                     @Override
@@ -176,6 +178,7 @@ public class Report extends AppCompatActivity {
 
             @Override
             public void onError(ANError ANError) {
+                utl.showDig(false,ctx);
 
 
                 utl.l(ANError.getErrorDetail());
@@ -195,11 +198,11 @@ public class Report extends AppCompatActivity {
         String url = "http://feelinglone.com/test/file_upload.php";
         utl.l(url);
         File f = new File(path);
-        if (f.length() < 2) {
+        utl.l(path);
+       if (f.length() < 2) {
             utl.snack(act, "Empty File !");
             return;
         }
-
 
         AndroidNetworking.upload(url).addMultipartFile("file", f).build().setUploadProgressListener(new UploadProgressListener() {
             @Override
@@ -237,8 +240,9 @@ public class Report extends AppCompatActivity {
 
             @Override
             public void onError(ANError ANError) {
-
-                utl.l(ANError.getErrorDetail());
+    utl.showDig(false,ctx);
+                utl.snack(act,"Error Occured while Uploading file !");
+                utl.l(ANError.getErrorDetail()+"\n"+ANError.getErrorBody());
             }
         });
 
