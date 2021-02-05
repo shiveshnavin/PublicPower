@@ -1265,7 +1265,6 @@ private class StartNextRotate implements Animation.AnimationListener {
     public void startlogin(String email,String auth,int isFacebook)
     {
 
-        //http://35.163.210.177/api/login.php?user_email=shiveshnavin@gmail.com&auth=643045572566298
 
 
         String url=Constants.HOST+"/api/login.php?" +
